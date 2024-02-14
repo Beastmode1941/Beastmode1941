@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: "en-US" }}">
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <link rel="shortcut icon" type="image/png" href="/assets/fav.png">
+
+{% seo %}
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        {% include nav.html %}
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        {{ content }}
+      </section>
+    </div>mkdir ${{ runner.temp }}/build_logs
+          ./build.sh --log-path ${{ runner.temp }}/build_logs
+      - name: Upload logs on fail
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build failure logs
+          path: ${{ runner.temp }}/build_logs
+name: Build
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with logs
+        run: |
+          mkdir ${{ runner.temp }}/build_logs
+          ./build.sh --log-path ${{ runner.temp }}/build_logs
+      - name: Upload logs on fail
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build failure logs
+          path: ${{ runner.temp }}/build_logs
+name: Generate random failure
+on: push
+jobs:
+  randomly-failing-job:
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        uses: actions/checkout@v4
+      - name: Generate 0 or 1
+        id: generate_number
+        run:  echo "random_number=$(($RANDOM % 2))" >> $GITHUB_OUTPUT
+      - name: Pass or fail
+        run: |
+          if [[ ${{ steps.generate_number.outputs.random_number }} == 0 ]]; then exit 0; else exit 1; fi
+runner.tempname: Reusable workflow
+
+on:
+  workflow_call:
+    # Map the workflow outputs to job outputs
+    outputs:
+      firstword:
+        description: "The first output string"
+        value: ${{ jobs.example_job.outputs.output1 }}
+      secondword:
+        description: "The second output string"
+        value: ${{ jobs.example_job.outputs.output2 }}
+
+jobs:
+  example_job:
+    name: Generate output
+    runs-on: ubuntu-latest
+    # Map the job outputs to step outputs
+    outputs:
+      output1: ${{ steps.step1.outputs.firstword }}
+      output2: ${{ steps.step2.outputs.secondword }}
+    steps:
+      - id: step1
+        run: echo "firstword=hello" >> $GITHUB_OUTPUT
+      - id: step2
+        run: echo "secondword=world" >> $GITHUB_OUTPUT
+name: Generate random failure
+on: push
+jobs:
+  randomly-failing-job:
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        uses: actions/checkout@v4
+      - name: Generate 0 or 1
+        id: generate_number
+        run:  echo "random_number=$(($RANDOM % 2))" >> $GITHUB_OUTPUT
+      - name: Pass or fail
+        run: |
+          if [[ ${{ steps.generate_number.outputs.random_number }} == 0 ]]; then exit 0; else exit 1; fi
+steps.step1.outputs.firstwordsteps.step2.outputs.secondwordon:
+  workflow_dispatch:
+env:
+  # Setting an environment variable with the value of a configuration variable
+  env_var: ${{ vars.ENV_CONTEXT_VAR }}
+
+jobs:
+  display-variables:
+    name: ${{ vars.JOB_NAME }}
+    # You can use configuration variables with the `vars` context for dynamic jobs
+    if: ${{ vars.USE_VARIABLES == 'true' }}
+    runs-on: ${{ vars.RUNNER }}
+    environment: ${{ vars.ENVIRONMENT_STAGE }}
+    steps:
+    - name: Use variables
+      run: |
+        echo "repository variable : $REPOSITORY_VAR"
+        echo "organization variable : $ORGANIZATION_VAR"
+        echo "overridden variable : $OVERRIDE_VAR"
+        echo "variable from shell environment : $env_var"
+      env:
+        REPOSITORY_VAR: ${{ vars.REPOSITORY_VAR }}
+        ORGANIZATION_VAR: ${{ vars.ORGANIZATION_VAR }}
+        OVERRIDE_VAR: ${{ vars.OVERRIDE_VAR }}
+        
+    - name: ${{ vars.HELLO_WORLD_STEP }}
+      if: ${{ vars.HELLO_WORLD_ENABLED == 'true' }}
+      uses: actions/hello-world-javascript-action@main
+      with:
+        who-to-greet: ${{ vars.GREET_NAME }}
+steps.step1.outputs.firstwordTap on a clip to pasteimport matplotlib.pyplot as plt
+import numpy as np
+
+
+def display_data(X, tile_width=-1, padding=0):
+    """
+    Display data in a nice grid
+
+    Parameters
+    ----------
+    X : ndarray, shape (n_samples, sample_size)
+        A collection of sample data to be displayed, where n_samples is the number of samples and sample_size is the
+        size of each sample.
+    tile_width : int
+        Width of each image.
+    padding : int
+        Padding around the image.
+    """
+    m, n = X.shape
+
+    if tile_width < 0:
+        tile_width = int(np.round(np.sqrt(n)))
+    tile_height = n / tile_width
+
+    display_rows = int(np.floor(np.sqrt(m)))
+    display_columns = int(np.ceil(m / display_rows))
+
+    tile_height_padded = tile_height + padding * 2
+    tile_width_padded = tile_width + padding * 2
+    data = np.zeros((display_rows * tile_height_padded, display_columns * tile_width_padded))
+
+    for i in range(display_rows):
+        for j in range(display_columns):
+            tile = format_tile(X[i * display_rows + j,], tile_width, padding)
+            tile = tile.T
+            data[i * tile_height_padded:(i + 1) * tile_height_padded,
+                 j * tile_width_padded:(j + 1) * tile_width_padded] = tile
+
+    plt.imshow(data, cmap='gray', extent=[0, 1, 0, 1])
+
+
+def format_tile(x, width=-1, padding=0):
+    """
+    Format raw data to a 2-d array for plot.
+
+    Parameters
+    ----------
+    x : ndarray, shape (sample_size, )
+        Sample data, where sample_size is the size of each sample.
+    width : int
+        Width of the image.
+    padding : int
+        Padding around the image.
+
+    Returns
+    -------
+    ndarray
+        The formatted 2-d array data for plot.
+    """
+    if width < 0:
+        width = int(np.round(np.sqrt(len(x))))
+    height = len(x) / width
+
+    tile = np.ones((height + padding * 2, width + padding * 2))
+
+    for i in range(padding, height + padding):
+        tile[i, padding:(padding + width)] = x[((i - padding) * width):((i - padding) * width + width)]
+
+    return tile
+    <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
+  </body>
+</html><!DOCTYPE html><html><head><meta name="color-scheme" content="light dark"><style type="text/css">* {user-select: auto !important; -webkit-user-select: auto !important;}</style><input type="hidden" id="inject_idm_text_selection"><style></style></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;feed xmlns="http://www.w3.org/2005/Atom" xmlns:creativeCommons="http://backend.userland.com/creativeCommonsRssModule" xmlns:re="http://purl.org/atompub/rank/1.0"&gt;
+    &lt;title type="text"&gt;Newest questions tagged google-apps-script - Stack Overflow&lt;/title&gt;
+    &lt;link rel="self" href="https://stackoverflow.com/feeds/tag?tagnames=google-apps-script&amp;amp;sort=newest" type="application/atom+xml" /&gt;
+    &lt;link rel="alternate" href="https://stackoverflow.com/questions/tagged/?tagnames=google-apps-script&amp;amp;sort=newest" type="text/html" /&gt;
+    &lt;subtitle&gt;most recent 30 from stackoverflow.com&lt;/subtitle&gt;
+    &lt;updated&gt;2024-01-20T07:51:26Z&lt;/updated&gt;
+    &lt;id&gt;https://stackoverflow.com/feeds/tag?tagnames=google-apps-script&amp;amp;sort=newest&lt;/id&gt;
+    &lt;creativeCommons:license&gt;https://creativecommons.org/licenses/by-sa/4.0/rdf&lt;/creativeCommons:license&gt; 
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77849933&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Button on click not executing in Google Apps Script&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="html" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="button" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Chris&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23271975&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77849933/button-on-click-not-executing-in-google-apps-script" /&gt;
+        &lt;published&gt;2024-01-20T05:32:14Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-20T05:50:40Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I am creating a side bar for data entry in google sheets. Everything in the scripts seems to have been working until I got to the on click execution potion. When I click on the button, nothing happens and there are no error messages. Below are the HTML and gs scripts. Any advise would be greatly appreciated.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;**InterDistForm.html Script:**&amp;#xA;&amp;#xA;&amp;amp;lt;!doctype html&amp;amp;gt;&amp;#xA;&amp;amp;lt;html lang=&amp;amp;quot;en&amp;amp;quot;&amp;amp;gt;&amp;#xA;  &amp;amp;lt;style&amp;amp;gt;&amp;#xA;    table {&amp;#xA;      border-spacing: 10px;&amp;#xA;      width: 100%;&amp;#xA;      font-size: 14pt;&amp;#xA;      height: 200px;&amp;#xA;      border: 1px;&amp;#xA;      border-radius: 10px;&amp;#xA;      border-color: darkblue;&amp;#xA;      background-color: lightblue;&amp;#xA;      align: center;&amp;#xA;    }&amp;#xA;    td {&amp;#xA;      border-color: white;&amp;#xA;    }&amp;#xA;    tr:hover {background-color: #D6EEEE;}&amp;#xA;&amp;#xA;    input,&amp;#xA;      select {&amp;#xA;        font-size: 12pt;&amp;#xA;        width: 100%;&amp;#xA;      }&amp;#xA;  &amp;amp;lt;/style&amp;amp;gt;&amp;#xA;  &amp;amp;lt;body&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;div&amp;amp;gt;&amp;#xA;      &amp;amp;lt;table&amp;amp;gt;&amp;#xA;        &amp;amp;lt;tr&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td align=&amp;amp;quot;left&amp;amp;quot;&amp;amp;gt;School Year:&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td align=&amp;amp;quot;left&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; name=&amp;amp;quot;schoolYear&amp;amp;quot; value = &amp;amp;quot;2025&amp;amp;quot; disabled/&amp;amp;gt;&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;        &amp;amp;lt;/tr&amp;amp;gt;&amp;#xA;&amp;#xA;        &amp;amp;lt;tr&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td align=&amp;amp;quot;left&amp;amp;quot;&amp;amp;gt;Date Received:&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td align=&amp;amp;quot;left&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;input type=&amp;amp;quot;date&amp;amp;quot; name=&amp;amp;quot;dateReceived&amp;amp;quot; /&amp;amp;gt;&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;        &amp;amp;lt;/tr&amp;amp;gt;&amp;#xA;&amp;#xA;        &amp;amp;lt;tr&amp;amp;gt;&amp;#xA;          &amp;amp;lt;th colspan=&amp;amp;quot;2&amp;amp;quot;; style=&amp;amp;quot;background-color:Cyan;&amp;amp;quot; &amp;amp;gt;Student Information&amp;amp;lt;/th&amp;amp;gt;&amp;#xA;        &amp;amp;lt;/tr&amp;amp;gt;&amp;#xA;&amp;#xA;        &amp;amp;lt;tr&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td align=&amp;amp;quot;left&amp;amp;quot;&amp;amp;gt;Student ID:&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td align=&amp;amp;quot;left&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; name=&amp;amp;quot;studentID&amp;amp;quot; value=&amp;amp;quot;0&amp;amp;quot;/&amp;amp;gt;&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;        &amp;amp;lt;/tr&amp;amp;gt;&amp;#xA;      &amp;amp;lt;/table&amp;amp;gt;&amp;#xA;      &amp;#xA;      &amp;amp;lt;br&amp;amp;gt;&amp;#xA;      &amp;amp;lt;button id=&amp;amp;quot;btnSubmit&amp;amp;quot;&amp;amp;gt;Submit&amp;amp;lt;/button&amp;amp;gt; &amp;#xA;      &amp;#xA;    &amp;amp;lt;/div&amp;amp;gt;&amp;#xA;    &amp;#xA;  &amp;amp;lt;script&amp;amp;gt;&amp;#xA;&amp;#xA;    function afterButtonClicked(){&amp;#xA;      var schoolYear = document.getElementById(&amp;amp;quot;schoolYear&amp;amp;quot;);&amp;#xA;      var dateReceived = document.getElementById(&amp;amp;quot;dateReceived&amp;amp;quot;);&amp;#xA;      var studentID = document.getElementById(&amp;amp;quot;studentID&amp;amp;quot;);&amp;#xA;&amp;#xA;      var rowData = {schoolYear: schoolYear.value&amp;#xA;                      ,dateReceived: dateReceived.value&amp;#xA;                      ,studentID: studentID.value&amp;#xA;                    };&amp;#xA;      &amp;#xA;      google.script.run.addInterToForm(rowData);&amp;#xA;    }&amp;#xA;&amp;#xA;    document.getElementById(&amp;amp;quot;btnSubmit&amp;amp;quot;).addEventListener(&amp;amp;quot;click&amp;amp;quot;,afterButtonClicked);&amp;#xA;&amp;#xA;   &amp;amp;lt;/script&amp;amp;gt; &amp;#xA;    &amp;#xA;  &amp;amp;lt;/body&amp;amp;gt;&amp;#xA;&amp;amp;lt;/html&amp;amp;gt;&amp;#xA;&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;**InterDistScript.gs Script:**&amp;#xA;&amp;#xA;var ssTransfers = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(&amp;amp;quot;Transfers&amp;amp;quot;);&amp;#xA;&amp;#xA;function loadForm() {&amp;#xA;  &amp;#xA;  const htmlForDialog = HtmlService.createTemplateFromFile(&amp;amp;quot;InterDistForm&amp;amp;quot;);&amp;#xA;  const htmlOutput = htmlForDialog.evaluate();&amp;#xA;&amp;#xA;  const ui = SpreadsheetApp.getUi();&amp;#xA;  ui.showSidebar(htmlOutput);&amp;#xA;&amp;#xA;}&amp;#xA;&amp;#xA;function addInterToForm(rowData){&amp;#xA;&amp;#xA;  ssTransfers.insertRowAfter(2); //Inserts blank row for data to be placed into&amp;#xA;  ssTransfers.getRange(3,3,1,3).setValues([[&amp;#xA;                               rowData.schoolYear&amp;#xA;                              ,rowData.dateReceived&amp;#xA;                              ,rowData.studentID&amp;#xA;                            ]]); //needs double []&amp;#xA;&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;When I hard coded the values in the scripts, the scripts executed properly.&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77849900&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;-1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;How to automatically insert values in a cell attached to their respective dates?&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="triggers" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="macros" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Yui Takahashi&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23271948&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77849900/how-to-automatically-insert-values-in-a-cell-attached-to-their-respective-dates" /&gt;
+        &lt;published&gt;2024-01-20T05:18:57Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-20T05:18:57Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I am trying to create an automated spreadsheet that will take values from a tab and then automatically store the values in the respective date and only input data into the specific day&amp;#x27;s row.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;The values are coming from a counter which I created a button that will increment the value by one every time the button is pressed.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I tried recording a macro and have the counter reset to zero whenever it&amp;#x27;s a new day, but it&amp;#x27;s been hard for me to figure out how to keep the previous day&amp;#x27;s data while entering in new values from the current day.&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77849826&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;need to get date from previous google sheet page inside content without having APP script&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="excel" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets-formula" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Mr.M&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/4659026&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77849826/need-to-get-date-from-previous-google-sheet-page-inside-content-without-having-a" /&gt;
+        &lt;published&gt;2024-01-20T04:30:07Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-20T04:30:07Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;Iam trying to do some automated work in Google sheet. I have a question below is my subject content which I have in one google sheet and the datea and other properties are in other google sheet.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;Request to stop the production for 01/15/2024 at 10:00 PM PM EST&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;The above date and time should come from previous sheet without using appsscript.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I am having this content in Different sheet if i try to put = and get the value from previous sheet that is not coming since this entire sentence in column.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Can some one please help me.&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77849643&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;-1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Turning GSheets formula to raw text if cell is not empty&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Thurman Murman&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/22582844&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77849643/turning-gsheets-formula-to-raw-text-if-cell-is-not-empty" /&gt;
+        &lt;published&gt;2024-01-20T02:25:50Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-20T02:25:50Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;Hi fellow google sheet enjoyers! I have a problem that I&amp;#x27;ve been trying to solve for a long time. I hope someone can help me write the required script.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I made a test table, identical in structure to the real one:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;a href=&amp;quot;https://docs.google.com/spreadsheets/d/1vQdYSofLmuN4ZNvLhPduDGei2uzkRrVdq-3l87N-OOw/edit#gid=0&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;Sample table&amp;lt;/a&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;It works like this:&amp;#xA;-The client confirms his application by clicking on the pre-filled form&amp;#xA;-After this, a line with the client number and a green dotappears on the &amp;#x201C;Confirmation - GForms&amp;#x201D; sheet.&amp;#xA;-In the table on the &amp;#x201C;Main Table&amp;#x201D; sheet, this green dot appears using &amp;#x201C;VLOOKUP&amp;#x201D;. To prevent the table from being overloaded, I need the formula with &amp;amp;quot;VLOOKUP&amp;amp;quot; to turn into raw text when a green dot appears (when the result &amp;amp;quot;VLOOOKUP&amp;amp;quot; is not empty)&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I&amp;#x27;m sure there&amp;#x27;s an easier way to do all this, but I&amp;#x27;m a noob at this.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I tried to put together a script in Apps Script from pieces of other people&amp;#x27;s posts from the forum, but nothing worked&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77849565&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Google Apps Script splice method oddness&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="splice" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;JOD&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23271545&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77849565/google-apps-script-splice-method-oddness" /&gt;
+        &lt;published&gt;2024-01-20T01:43:23Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-20T02:32:49Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;splice seems to be creating a dynamic relationship between spliced in elements and the elements they were spliced from ... ???&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Say I have an array&amp;#xA;Array = [ [1 , 2 , 3] ]&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I want to duplicate this column and change the last value of the new column to 4. I used:&amp;#xA;nada = Array.splice(0,0,Array[0]);&amp;#xA;Array[1][2] = 4;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;However, this results in&amp;#xA;Array = [ [ 1 , 2 , 4] , [ 1 , 2 , 4] ]&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;This is a stripped down example, in the actual problem I&amp;#x27;m iterating through solutions adding possibilities at each step, so nested loops would get messy ...&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Insights?? .. or: how do I duplicate a column in the middle of an array and change one of it&amp;#x27;s values?&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77847407&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;How to change the colour of slides wordart using Apps script&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-slides" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Colin Wood&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/12487617&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77847407/how-to-change-the-colour-of-slides-wordart-using-apps-script" /&gt;
+        &lt;published&gt;2024-01-19T16:09:10Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-19T17:18:52Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;Can you suggest a way to change the color of WordArt in Google slides using Apps script?&amp;#xA;When I refer to the object as a shape I get an error message about the object not being of type shape. But I can&amp;#x27;t see any methods for the WordArt object type that will allow me to change its colour. I&amp;#x27;ve only limited experience with Apps script but surely there must be a way!&amp;#xA;&amp;#x27;SlidesApp.getActivePresentation().getPageElementById(&amp;#x27;g2b10b3710e9_4_1&amp;#x27;).asShape().getFill().setSolidFill(250, 250, 250, 1);&amp;#x27;&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77846942&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;How to use google script on google sheet?&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;ganfall llafnag&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23269655&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77846942/how-to-use-google-script-on-google-sheet" /&gt;
+        &lt;published&gt;2024-01-19T14:50:20Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-19T17:29:46Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I just got this script from youtube. Can anyone teach me how can I use this on both column 6 and column 7? I really don&amp;#x27;t have a single idea I&amp;#x27;m just using this for my small business to make my tracker easier. Thank you in advance!&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function onEdit (e){&amp;#xA;if (e.range.columnStart != 6 || e.value != &amp;amp;quot;TRUE&amp;amp;quot;) return;&amp;#xA;SpreadsheetApp.getActiveSheet().hideRows(e.range.rowStart);  &amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77846873&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Send email when cell value is set to &amp;quot;Yes&amp;quot;&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;brianna_datap&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23266071&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77846873/send-email-when-cell-value-is-set-to-yes" /&gt;
+        &lt;published&gt;2024-01-19T14:38:46Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-19T21:07:13Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I have combed through tons of answered questions and I&amp;#x27;m still not able to make this work. What I want to do is pretty simple, but I don&amp;#x27;t ever write code, so I&amp;#x27;m stuck.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I want an email to be sent out whenever someone sets a cell value to &amp;amp;quot;Yes&amp;amp;quot; from a data validation dropdown in column D.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;This is the code I currently have&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function onEdit(e) {&amp;#xA;sendEmails(e)&amp;#xA;}&amp;#xA;&amp;#xA;function sendEmails(e){&amp;#xA;  var row = e.range.getRow();&amp;#xA;  var col = e.range.getColumn();&amp;#xA;  var subject = &amp;amp;quot;This is the subject of the email&amp;amp;quot;;&amp;#xA;  var body = &amp;amp;quot;This is the body of the email&amp;amp;quot;;&amp;#xA;  var to = &amp;amp;quot;email1@gmail.com&amp;amp;quot;;&amp;#xA;  var cc = &amp;amp;quot;email2@gmail.com&amp;amp;quot;;&amp;#xA;  &amp;#xA;  if (col == 4 &amp;amp;amp;&amp;amp;amp; row &amp;amp;gt; 2 &amp;amp;amp;&amp;amp;amp; e.range.getValue() == &amp;amp;quot;Yes&amp;amp;quot;){&amp;#xA;    GmailApp.sendEmail({to:to, subject:subject, body:body, cc:cc});&amp;#xA;    }&amp;#xA;   }&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I was able to send an email when I used GmailApp.sendEmail() with an onEdit() trigger, so I don&amp;#x27;t think it&amp;#x27;s a permissions issue. Something seems like it&amp;#x27;s breaking in the logic I set up. Like I said, I never code. So I&amp;#x27;m lost. Any help is appreciated!&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77844725&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Google forms set automatically answer based on selection&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Rolando Azevedo&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/6224557&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77844725/google-forms-set-automatically-answer-based-on-selection" /&gt;
+        &lt;published&gt;2024-01-19T08:41:42Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-19T22:01:43Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I have a Google Forms where one of the fields is a dropdown to select a department. When choosing the department, I want a column for email to appear in my responses, but I want it to be already filled in without having to select it. For example, when selecting &amp;#x27;Human Resources&amp;#x27;, I want the email answer to be set to hr@test.com. What is the best way to do this, use Apps Script or link to another spreadsheet containing all the emails?&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77844642&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;-1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Accuracy of ML Kit and Google Apps Script (GAS) Translation method&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="firebase-mlkit" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;mozuku&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23135826&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77844642/accuracy-of-ml-kit-and-google-apps-script-gas-translation-method" /&gt;
+        &lt;published&gt;2024-01-19T08:23:10Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-19T08:23:10Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I am personally developing a web translation application with Flutter x Firebase. I am considering which of the following translation APIs to use. Both are free.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;(1) ML Kit&amp;#x27;s on-device translation API&amp;#xA;(2) Google Apps Script (GAS) translation functionality available via the translate method.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;The ML Kit uses the same model used in the offline mode of the Google Translate app, so it seems to be a little less accurate than the online Google Translate.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;About ML kit: &amp;lt;a href=&amp;quot;https://developers.google.com/ml-kit/language/translation?hl=en&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;https://developers.google.com/ml-kit/language/translation?hl=en&amp;lt;/a&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Which translation accuracy is better, (1) or (2)?&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77843557&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;My Google Sheet doesn&amp;#x27;t Update the data from Google Form&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-forms" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="zapier" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;591 591&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23266889&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77843557/my-google-sheet-doesnt-update-the-data-from-google-form" /&gt;
+        &lt;published&gt;2024-01-19T03:27:47Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-19T03:53:56Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;So I&amp;#x27;m currently doing a security system where it will report based on the reporting category and submit the form. For my system, there are 7 types of reporting. 6 of them are working fine, but 1 of the reporting doesn&amp;#x27;t save the data into the Google Sheet, which also caused it cannot send Message to WhatsApp (the group id is already declared in Apps Script). For the whole process, its start with fill in the form, then the data will send to Zapier automation, then Zapier will send the data to Google Sheet, and then trigger the code to send WhatsApp. But now my biggest issue is, there is one reporting doesn&amp;#x27;t save the data into sheet, while others works completely fine. What should I do? I need your guys help!&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I&amp;#x27;ve checked the variable and the link id carefully to make sure there is no error, but still the one type of reporting is not working what I want.&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77842854&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;-1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Update the Form&amp;#x27;s Script URL&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-workspace" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Rfsg JJewel&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23266293&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77842854/update-the-forms-script-url" /&gt;
+        &lt;published&gt;2024-01-18T22:52:39Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T22:52:39Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;How do I complete these steps after deployment i have copied the Url however I cannot locate the next step.&amp;#xA;Update the Form&amp;#x27;s Script URL:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Replace &amp;#x27;YOUR_SCRIPT_ID&amp;#x27; in the form&amp;#x27;s script with the URL you just copied.&amp;#xA;Test the Form:&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77842813&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Google onEdit trigger Exception: When &amp;amp;quot;wait .....&amp;amp;quot;, do not edit&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;SPCsoft&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23266004&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77842813/google-onedit-trigger-exception-when-quotwait-quot-do-not-edit" /&gt;
+        &lt;published&gt;2024-01-18T22:41:46Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T22:41:46Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;For some people who installed my To-do list plugin which I published on Google Workspace MarketPlace, they have the an error Exception: When &amp;amp;quot;wait .....&amp;amp;quot;, do not edit. The message is not from my scripts. The error stack points to the script &amp;amp;quot;SpreadsheetApp.flush()&amp;amp;quot;. I googled and could not find any information about this error. Does anyone know what this error means and how to avoid it?&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77842242&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Google Apps Script issue in copying sheet: &amp;quot;Service Spreadsheets Failed While Accessing Document with ID&amp;quot;&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="javascript" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Arthur Paiva&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23265727&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77842242/google-apps-script-issue-in-copying-sheet-service-spreadsheets-failed-while-ac" /&gt;
+        &lt;published&gt;2024-01-18T20:29:52Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T20:56:18Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;First time in Stack Overflow. My English is also not that good. Apologize.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I have a Google Apps Script which copies some sheets to another spreadsheet. The sheets have around 30 columns and 55 rows, and they might contain 1 or 2 images, some formatting, and conditional formatting. The app suddenly stopped working, after some weeks of occasional error.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Here is an example of the spreadsheet with the sheets I need to copy: &amp;lt;a href=&amp;quot;https://docs.google.com/spreadsheets/d/1WgT5fLjNseSZcXWyuzYcz3d3JLlOW5EmUNH60jjkShk/edit#gid=416376495&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;https://docs.google.com/spreadsheets/d/1WgT5fLjNseSZcXWyuzYcz3d3JLlOW5EmUNH60jjkShk/edit#gid=416376495&amp;lt;/a&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;The original code goes like this, which returns an error &amp;amp;quot;service spreadsheets failed while accessing document with id&amp;amp;quot; in the &amp;amp;quot;copyTo&amp;amp;quot; line.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;let ss_editora = SpreadsheetApp.openById(id_ss_editora);&amp;#xA;let ss_ficha = SpreadsheetApp.openById(id_ss_ficha);&amp;#xA;let ss_editora_sheets = ss_editora.getSheets();&amp;#xA;let ss_ficha_sheets = ss_ficha.getSheets();&amp;#xA;&amp;#xA;let ren_ficha = ss_editora.insertSheet();&amp;#xA;for (let i = 0; i &amp;amp;lt; ss_editora_sheets.length; i&amp;#x2B;&amp;#x2B;) { ss_editora.deleteSheet(ss_editora_sheets[i]) }&amp;#xA;&amp;#xA;for (let i = 0; i &amp;amp;lt; ss_ficha_sheets.length; i&amp;#x2B;&amp;#x2B;) {&amp;#xA;  let ss_ficha_sheet = ss_ficha_sheets[i];&amp;#xA;  let nova_sheet = ss_ficha_sheet.copyTo(ss_editora); // Error&amp;#xA;  nova_sheet.setName(ss_ficha_sheet.getName());&amp;#xA;}&amp;#xA;ss_editora.deleteSheet(ren_ficha);&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I&amp;#x27;ve tried to simply remove images, this seems to work, but I do need the images.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Also, I&amp;#x27;ve tried to rewrite the code without copyTo, by using Bing AI. But it returns an error &amp;amp;quot;service spreadsheets timed out while accessing document with id&amp;amp;quot; in the &amp;amp;quot;setValues&amp;amp;quot; line, even if I remove the images.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function copySheets(id_ss_ficha, id_ss_editora) {&amp;#xA;  const ss_ficha = SpreadsheetApp.openById(id_ss_ficha);&amp;#xA;  const ss_editora = SpreadsheetApp.openById(id_ss_editora);&amp;#xA;&amp;#xA;  let ss_editora_sheets = ss_editora.getSheets();&amp;#xA;  let ren_ficha = ss_editora.insertSheet();&amp;#xA;  for (let i = 0; i &amp;amp;lt; ss_editora_sheets.length; i&amp;#x2B;&amp;#x2B;) { ss_editora.deleteSheet(ss_editora_sheets[i]) };&amp;#xA;&amp;#xA;  const ss_ficha_sheets = ss_ficha.getSheets();&amp;#xA;  ss_ficha_sheets.forEach(sheet =&amp;amp;gt; {&amp;#xA;    const nova_sheet = ss_editora.insertSheet();&amp;#xA;    const data = sheet.getDataRange().getValues();&amp;#xA;    nova_sheet.getRange(1, 1, data.length, data[0].length).setValues(data); // Error&amp;#xA;    const images = sheet.getImages();&amp;#xA;    sheet.copyTo()&amp;#xA;    images.forEach(image =&amp;amp;gt; {&amp;#xA;      const blob = image.getBlob();&amp;#xA;      const imageFile = DriveApp.createFile(blob);&amp;#xA;      const imageBlob = imageFile.getBlob();&amp;#xA;      const imagePosition = image.getAnchorCell().getA1Notation();&amp;#xA;      nova_sheet.insertImage(imageBlob, imagePosition);&amp;#xA;    });&amp;#xA;    const conditionalFormats = sheet.getConditionalFormats();&amp;#xA;    const ranges = conditionalFormats.getRangeList();&amp;#xA;    const rules = conditionalFormats.getRules();&amp;#xA;    ranges.forEach(range =&amp;amp;gt; {&amp;#xA;      range.setConditionalFormatRules(rules);&amp;#xA;    });&amp;#xA;    nova_sheet.setName(sheet.getName());&amp;#xA;  });&amp;#xA;&amp;#xA;  ss_editora.deleteSheet(ren_ficha);&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;How do I fix this? It seems like an issue (&amp;lt;a href=&amp;quot;https://issuetracker.google.com/issues/156530211&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;https://issuetracker.google.com/issues/156530211&amp;lt;/a&amp;gt;, &amp;lt;a href=&amp;quot;https://issuetracker.google.com/issues/317861129&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;https://issuetracker.google.com/issues/317861129&amp;lt;/a&amp;gt;), but I do need a workaround.&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77841885&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Google Slides Editor Add-on: Translate&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="formatting" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-slides" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;BD709&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23265532&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77841885/google-slides-editor-add-on-translate" /&gt;
+        &lt;published&gt;2024-01-18T19:10:32Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T19:10:32Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I&amp;#x27;m working off of this sample &amp;lt;a href=&amp;quot;https://developers.google.com/apps-script/add-ons/editors/slides/quickstart/translate&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;Apps Script&amp;lt;/a&amp;gt; to help a teacher translate a Google Slides presentation into another language to support a student. The translation function works great. In the presentation, there are some key terms underlined that indicate to the students what should be filled in on their notes pages. Unfortunately, after translating the slide, the formatting will also be modified. For example, if the slide starts with an underlined word, all words that follow will be underlined. For this teacher&amp;#x27;s specific purpose, the slides then become pretty much useless.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I&amp;#x27;m new to Google Apps Script, but was wondering if anyone knew of a way to preserve the formatting? Any guidance you could provide would be appreciated!&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77841631&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;-1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Use an image in an Alert&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="html" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Pieter le Roux&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/22321741&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77841631/use-an-image-in-an-alert" /&gt;
+        &lt;published&gt;2024-01-18T18:21:51Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T23:42:59Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I have a Google Apps Script that needs to return a success message. But I want an image of a green tick in an alert box instead of returning a text success message at the bottom of the page. But after the script runs successfully, my alert box opens with a message saying that some script.googleusercontent.com says: (blank)&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;All of the below comes from the HTML file.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;In the style section I have this:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;#alert {&amp;#xA;      display: none;&amp;#xA;      background-color: lightgrey;&amp;#xA;      border: 1px solid green;&amp;#xA;      position: fixed;&amp;#xA;      width: 250px;&amp;#xA;      left: 45%;&amp;#xA;      top: 2%;&amp;#xA;      padding: 6px 8px 8px;&amp;#xA;      text-align: center;&amp;#xA;   }&amp;#xA;   img {&amp;#xA;      width: 10rem;&amp;#xA;      height: 10rem;&amp;#xA;   }&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;In the script section I have this:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;var alertDiv = document.getElementById(&amp;amp;quot;alert&amp;amp;quot;);&amp;#xA;      function invokeAlert() {&amp;#xA;         alertDiv.style.display = &amp;amp;quot;block&amp;amp;quot;;&amp;#xA;      }&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;In the body section I have this:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;&amp;amp;lt;div id = &amp;amp;quot;alert&amp;amp;quot;&amp;amp;gt;&amp;#xA;      &amp;#xA;      &amp;amp;lt;img src=&amp;amp;quot;https://drive.usercontent.google.com/download?id=1QPJ1fCWqsE_F-jYH_6L8loTFQr-k8H-J&amp;amp;quot;&amp;amp;gt; &amp;amp;lt;/img&amp;amp;gt;&amp;#xA;    &amp;#xA;   &amp;amp;lt;/div&amp;amp;gt;&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77841432&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Google appscript has suddenly stopped working?&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="javascript" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;NowOrTater&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/12508155&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77841432/google-appscript-has-suddenly-stopped-working" /&gt;
+        &lt;published&gt;2024-01-18T17:43:48Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T23:22:47Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;It was working fine up until yesterday, its a script to take in one number and see how many combinations another set of numbers will add up to that one number. It is producing a blank field in column J, where it has been showing what combinations will make up the top number.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function findAndDisplayMaxCombination() {&amp;#xA;  try {&amp;#xA;    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();&amp;#xA;    var targetAmount = sheet.getRange(&amp;amp;quot;G2&amp;amp;quot;).getValue();&amp;#xA;    var values = sheet.getRange(&amp;amp;quot;G4:G&amp;amp;quot; &amp;#x2B; sheet.getLastRow()).getValues().flat();&amp;#xA;&amp;#xA;    // Set the time limit to 3 minutes (in seconds)&amp;#xA;    var timeLimit = 600;&amp;#xA;    var startTime = new Date().getTime();&amp;#xA;&amp;#xA;    // Find the combination with the most values&amp;#xA;    var maxCombination = findMaxCombination(targetAmount, values, startTime, timeLimit);&amp;#xA;&amp;#xA;    // Ensure the script has permission to edit the sheet&amp;#xA;    SpreadsheetApp.getActiveSpreadsheet().toast(&amp;amp;quot;Authorization check passed. Updating the sheet...&amp;amp;quot;, &amp;amp;quot;Status&amp;amp;quot;, 5);&amp;#xA;&amp;#xA;    // Clear the contents of column I&amp;#xA;    sheet.getRange(&amp;amp;quot;I4:I&amp;amp;quot;).clearContent();&amp;#xA;&amp;#xA;    // Write each value in the max combination to column J&amp;#xA;    for (var i = 0; i &amp;amp;lt; maxCombination.length; i&amp;#x2B;&amp;#x2B;) {&amp;#xA;      sheet.getRange(&amp;amp;quot;I&amp;amp;quot; &amp;#x2B; (i &amp;#x2B; 4)).setValue(maxCombination[i]);&amp;#xA;    }&amp;#xA;  } catch (error) {&amp;#xA;    // Log any errors&amp;#xA;    Logger.log(&amp;amp;quot;Error: &amp;amp;quot; &amp;#x2B; error);&amp;#xA;    SpreadsheetApp.getActiveSpreadsheet().toast(&amp;amp;quot;An error occurred. Check the logs for details.&amp;amp;quot;, &amp;amp;quot;Error&amp;amp;quot;, 5);&amp;#xA;  }&amp;#xA;}&amp;#xA;&amp;#xA;function findMaxCombination(target, values, startTime, timeLimit) {&amp;#xA;  var result = [];&amp;#xA;&amp;#xA;  function search(index, currentSum, currentCombination) {&amp;#xA;    // Check if the time limit has been exceeded&amp;#xA;    if (new Date().getTime() - startTime &amp;amp;gt; timeLimit * 1000) {&amp;#xA;      return;&amp;#xA;    }&amp;#xA;&amp;#xA;    if (currentSum === target) {&amp;#xA;      if (currentCombination.length &amp;amp;gt; result.length) {&amp;#xA;        result = currentCombination.slice(); // Update result with the longer combination&amp;#xA;      }&amp;#xA;      return;&amp;#xA;    }&amp;#xA;&amp;#xA;    if (index === values.length) {&amp;#xA;      return;&amp;#xA;    }&amp;#xA;&amp;#xA;    search(index &amp;#x2B; 1, currentSum, currentCombination); // Exclude the current value&amp;#xA;    search(index &amp;#x2B; 1, currentSum &amp;#x2B; values[index], currentCombination.concat(values[index])); // Include the current value&amp;#xA;  }&amp;#xA;&amp;#xA;  search(0, 0, []);&amp;#xA;  return result;&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77840484&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;How to solve the sandbox Error in Windows 7 and Windows 8&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="javascript" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="css" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;karthick ks&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/16151955&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77840484/how-to-solve-the-sandbox-error-in-windows-7-and-windows-8" /&gt;
+        &lt;published&gt;2024-01-18T15:18:26Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T15:18:26Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;Here placed code for i have created Dashboard page using Google AppScript and Google Sheet. and this code displayed good displayed in Windows 10 and latest but below said the error showing in Windows7 &amp;amp;amp; Windows8. How To fix&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Console Error : Error while parsing the &amp;#x27;sandbox&amp;#x27; attribute: &amp;#x27;allow-storage-access-by-user-activation&amp;#x27; is an invalid sandbox flag.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Google AppScript Code:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function doGet(e) {&amp;#xA;  if (!e.parameter.page) {&amp;#xA;    var htmlOutput = HtmlService.createTemplateFromFile(&amp;#x27;Dashboard&amp;#x27;);&amp;#xA;    return htmlOutput.evaluate()&amp;#xA;      .setTitle(&amp;#x27;Dashboard&amp;#x27;)      &amp;#xA;      .setSandboxMode(HtmlService.SandboxMode.IFRAME)&amp;#xA;      .addMetaTag(&amp;#x27;viewport&amp;#x27;, &amp;#x27;width=device-width, initial-scale=1&amp;#x27;)&amp;#xA;      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);&amp;#xA;  }&amp;#xA;&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77840318&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Unable to add json data to Google sheets through HTTP post request using Google Apps Script&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="json" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="http-post" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-account" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Somanna&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/8247997&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77840318/unable-to-add-json-data-to-google-sheets-through-http-post-request-using-google" /&gt;
+        &lt;published&gt;2024-01-18T14:54:31Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-19T00:05:42Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Objective:&amp;lt;/strong&amp;gt;&amp;lt;br /&amp;gt;&amp;#xA;To append multiple rows at a time into a google sheet by passing the data as JSON via HTTP post request.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Steps to produce the problem:&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;ol&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Created a sheet named &amp;amp;quot;test log&amp;amp;quot; in google sheets.&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Wrote Apps Script to receive JSON data containing multiple records from a HTTP post request and append each reacord to a new row in the sheet. [Find code below]&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Ran cURL to make a HTTP post request to append the JSON data to the sheet. [Find code below]&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;/ol&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Result:&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;ol&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Apps Script raises the following error.&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;/ol&amp;gt;&amp;#xA;&amp;lt;blockquote&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Sorry, unable to open the file at this time. Please check the address and try again.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;/blockquote&amp;gt;&amp;#xA;&amp;lt;ol start=&amp;quot;2&amp;quot;&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;An empty row is added to the sheet after the request is finished.&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;/ol&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Things to note:&amp;lt;/strong&amp;gt;&amp;lt;br /&amp;gt;&amp;#xA;The apps script is deployed as a web-app with access to any annonymus user.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Things I have tried (None of them worked):&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;ol&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Changed the App Script owner from myself to annonymus. To check if the issue was related to google account.&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Opened an ingognito window in my browser, then opened the google sheet and ran the cURL.&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;In the post request, removed multiple records from the JSON data and replaced it with one record only.&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Tried solutions posted to similar question like this on stackoverflow and else where.&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;/ol&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Google Apps-Script Code:&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;// Google Apps Script Code&amp;#xA;var sheetName = &amp;amp;quot;test log&amp;amp;quot;; // Replace with your sheet name&amp;#xA;&amp;#xA;function doGet(e) {&amp;#xA;    return ContentService.createTextOutput(&amp;amp;quot;GET request processed successfully&amp;amp;quot;).setMimeType(ContentService.MimeType.TEXT);&amp;#xA;}&amp;#xA;&amp;#xA;function doPost(e) {&amp;#xA;  // Your code for handling POST requests&amp;#xA;  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);&amp;#xA;&amp;#xA;  // Get JSON payload from the request&amp;#xA;  var jsonData = e.postData.contents;&amp;#xA;  var data = JSON.parse(jsonData);&amp;#xA;&amp;#xA;  // Map incoming data to corresponding headers&amp;#xA;  var mappedData = {&amp;#xA;    &amp;amp;quot;Date&amp;amp;quot;: data.date || &amp;amp;quot;&amp;amp;quot;,&amp;#xA;    &amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;: data.energyConsumed || &amp;amp;quot;&amp;amp;quot;,&amp;#xA;    &amp;amp;quot;Meter ID&amp;amp;quot;: data.slaveID || &amp;amp;quot;&amp;amp;quot;,&amp;#xA;    &amp;amp;quot;Gateway Poll Result&amp;amp;quot;: data.gatewayPollResult || &amp;amp;quot;&amp;amp;quot;,&amp;#xA;    &amp;amp;quot;1st Register Value&amp;amp;quot;: data.reg1val || &amp;amp;quot;&amp;amp;quot;,&amp;#xA;    &amp;amp;quot;2nd Register Value&amp;amp;quot;: data.reg2val || &amp;amp;quot;&amp;amp;quot;&amp;#xA;    // Add more mappings as needed&amp;#xA;  };&amp;#xA;&amp;#xA;  // Construct the data array with the correct order&amp;#xA;  var orderedData = orderData(mappedData, [&amp;amp;quot;Date&amp;amp;quot;, &amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;, &amp;amp;quot;Meter ID&amp;amp;quot;, &amp;amp;quot;Gateway Poll Result&amp;amp;quot;, &amp;amp;quot;1st Register Value&amp;amp;quot;, &amp;amp;quot;2nd Register Value&amp;amp;quot;]);&amp;#xA;&amp;#xA;  // Insert data at the second row (index 1)&amp;#xA;  sheet.insertRowBefore(2);&amp;#xA;  sheet.getRange(2, 1, 1, orderedData.length).setValues([orderedData]);&amp;#xA;&amp;#xA;  return ContentService.createTextOutput(&amp;amp;quot;Data added successfully&amp;amp;quot;).setMimeType(ContentService.MimeType.TEXT);&amp;#xA;}&amp;#xA;&amp;#xA;// Function to order the data array based on specified headers&amp;#xA;function orderData(data, headers) {&amp;#xA;  var orderedData = [];&amp;#xA;&amp;#xA;  headers.forEach(function (header) {&amp;#xA;    if (data.hasOwnProperty(header)) {&amp;#xA;      orderedData.push(data[header]);&amp;#xA;    } else {&amp;#xA;      orderedData.push(&amp;amp;quot;&amp;amp;quot;); // If the header doesn&amp;#x27;t have corresponding data, insert an empty string&amp;#xA;    }&amp;#xA;  });&amp;#xA;&amp;#xA;  return orderedData;&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;appsscript.json:&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;{&amp;#xA;  &amp;amp;quot;timeZone&amp;amp;quot;: &amp;amp;quot;Asia/Kolkata&amp;amp;quot;,&amp;#xA;  &amp;amp;quot;exceptionLogging&amp;amp;quot;: &amp;amp;quot;STACKDRIVER&amp;amp;quot;,&amp;#xA;  &amp;amp;quot;runtimeVersion&amp;amp;quot;: &amp;amp;quot;V8&amp;amp;quot;,&amp;#xA;  &amp;amp;quot;webapp&amp;amp;quot;: {&amp;#xA;    &amp;amp;quot;executeAs&amp;amp;quot;: &amp;amp;quot;USER_DEPLOYING&amp;amp;quot;,&amp;#xA;    &amp;amp;quot;access&amp;amp;quot;: &amp;amp;quot;ANYONE_ANONYMOUS&amp;amp;quot;&amp;#xA;  }&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;cURL:&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;curl -X POST&amp;#xA;-H &amp;#x27;Content-Type: application/json&amp;#x27;&amp;#xA;-d &amp;#x27;[{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;0.00&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;1&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;0&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;0&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;0&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;999259.13&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;2&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;18803&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;62898&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;4603.56&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;3&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;32081&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;19084&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;4563.96&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;4&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;18416&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;19083&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;42749.73&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;5&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;18214&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;64956&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;31587.45&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;6&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;18166&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;50919&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;39329.72&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;7&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;2031&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;19478&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;131805.58&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;8&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;26161&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;19707&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;116166.34&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;37336&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;19677&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;136570.23&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;10&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;15960&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;19714&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;41472.99&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;11&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;13560&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;19486&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;82634.91&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;12&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;40212&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;19613&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;85259.05&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;13&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;40550&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;19618&amp;amp;quot;},{&amp;amp;quot;Date&amp;amp;quot;:&amp;amp;quot;1705599163&amp;amp;quot;,&amp;amp;quot;Energy Consumed (kWh)&amp;amp;quot;:&amp;amp;quot;147647.23&amp;amp;quot;,&amp;amp;quot;Meter ID&amp;amp;quot;:&amp;amp;quot;14&amp;amp;quot;,&amp;amp;quot;Gateway Poll Result&amp;amp;quot;:&amp;amp;quot;9&amp;amp;quot;,&amp;amp;quot;1st Register Value&amp;amp;quot;:&amp;amp;quot;52912&amp;amp;quot;,&amp;amp;quot;2nd Register Value&amp;amp;quot;:&amp;amp;quot;19724&amp;amp;quot;}]&amp;#x27;&amp;#xA; https://script.google.com/macros/s/AKfyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxp2Q/exec&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Headers in the Google sheet:&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;ul&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Date&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Panel&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Energy&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Consumed (kWh)&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Meter ID&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Gateway Poll Result&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;1st Register Value&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;2nd Register Value&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Dummy Col 1&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;Dummy Col 2&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;/ul&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77839664&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;How to create loop through moving an array over 2 columns&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-workspace" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Alex Deli&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23263977&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77839664/how-to-create-loop-through-moving-an-array-over-2-columns" /&gt;
+        &lt;published&gt;2024-01-18T13:11:48Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T13:13:04Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;i have name:value pairs in the range RA1:RB21 that I want to 2 columns over.  I need to repeat the process 480 times but I&amp;#x27;m struggling with how to create a loop to move over 2 columns.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;See below for what I&amp;#x27;m doing manually.  Yes I&amp;#x27;ve tried Googling and searching stack overflow but the results are moving a row or moving a single column.  I&amp;#x27;m pretty sure I can use MoveColumns but struggling with how to create a loop with this array.  Appreciate any help or direction.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Note I&amp;#x27;m using the {contentsonly: true} flag but its not necessary.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;    var sheet = SpreadsheetApp.getActive().getSheetByName(&amp;amp;quot;some cool sheet&amp;amp;quot;);&amp;#xA;    sheet.getRange(&amp;amp;quot;RY2:RZ21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;SA2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RW2:RX21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RY2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RU2:RV21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RW2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RS2:RT21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RU2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RQ2:RR21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RS2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RO2:RP21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RQ2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RM2:RN21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RO2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RK2:RL21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RM2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RI2:RJ21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RK2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RG2:RH21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RI2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RE2:RF21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RG2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RC2:RD21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RE2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;    sheet.getRange(&amp;amp;quot;RA2:RB21&amp;amp;quot;).copyTo(sheet.getRange(&amp;amp;quot;RC2&amp;amp;quot;), {contentsOnly: true});&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77838102&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;GDrive Search all files in MyDrive which are shared&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-drive-api" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;J. Doe&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/8148139&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77838102/gdrive-search-all-files-in-mydrive-which-are-shared" /&gt;
+        &lt;published&gt;2024-01-18T09:01:11Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T12:58:48Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I have create this script:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function listAllFiles() {&amp;#xA;  var MyAccount = Session.getActiveUser().getEmail();&amp;#xA;  var files = DriveApp.getFiles();&amp;#xA;  var files = DriveApp.searchFiles(&amp;#x27;&amp;amp;quot;&amp;#x27; &amp;#x2B; MyAccount &amp;#x2B; &amp;#x27;&amp;amp;quot; in owners&amp;#x27;);&amp;#xA;  while (files.hasNext()) {&amp;#xA;    var file = files.next();&amp;#xA;    Logger.log(file.getName());&amp;#xA;  }&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;How do I extend my filter so that I get back all files/directories that are mine and have been shared?&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Who has a short example for me?&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Thanks&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function listAllFiles() {&amp;#xA;  var MyAccount = Session.getActiveUser().getEmail();&amp;#xA;  var files = DriveApp.getFiles();&amp;#xA;  var files = DriveApp.searchFiles(&amp;#x27;&amp;amp;quot;&amp;#x27; &amp;#x2B; MyAccount &amp;#x2B; &amp;#x27;&amp;amp;quot; in owners&amp;#x27;);&amp;#xA;  while (files.hasNext()) {&amp;#xA;    var file = files.next();&amp;#xA;    Logger.log(file.getName());&amp;#xA;  }&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77836642&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;google app script about countColoredCells and sumColoredCells&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;stacker&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23261348&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77836642/google-app-script-about-countcoloredcells-and-sumcoloredcells" /&gt;
+        &lt;published&gt;2024-01-18T02:54:19Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T04:19:27Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I use the following two scripts in Google Sheets to count and sum based on background colors, and I often encounter errors: Exceeded maximum execution time (line 0).&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function countColoredCells(countRange,colorRef) {&amp;#xA;  var activeRange = SpreadsheetApp.getActiveRange();&amp;#xA;  var activeSheet = activeRange.getSheet();&amp;#xA;  var formula = activeRange.getFormula();&amp;#xA;  &amp;#xA;  var rangeA1Notation = formula.match(/\((.*)\,/).pop();&amp;#xA;  var range = activeSheet.getRange(rangeA1Notation);&amp;#xA;  var bg = range.getBackgrounds();&amp;#xA;  var values = range.getValues();&amp;#xA;  &amp;#xA;  var colorCellA1Notation = formula.match(/\,(.*)\)/).pop();&amp;#xA;  var colorCell = activeSheet.getRange(colorCellA1Notation);&amp;#xA;  var color = colorCell.getBackground();&amp;#xA;  &amp;#xA;  var count = 0;&amp;#xA;  &amp;#xA;  for(var i=0;i&amp;amp;lt;bg.length;i&amp;#x2B;&amp;#x2B;)&amp;#xA;    for(var j=0;j&amp;amp;lt;bg[0].length;j&amp;#x2B;&amp;#x2B;)&amp;#xA;      if( bg[i][j] == color )&amp;#xA;        count=count&amp;#x2B;1;&amp;#xA;  return count;&amp;#xA;};&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;and&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function sumColoredCells(sumRange,colorRef) {&amp;#xA;  var activeRange = SpreadsheetApp.getActiveRange();&amp;#xA;  var activeSheet = activeRange.getSheet();&amp;#xA;  var formula = activeRange.getFormula().toString();&amp;#xA;  formula = formula.replace(new RegExp(&amp;#x27;;&amp;#x27;,&amp;#x27;g&amp;#x27;),&amp;#x27;,&amp;#x27;);&amp;#xA;  &amp;#xA;  &amp;#xA;  var rangeA1Notation = formula.match(/\((.*)\,/).pop();&amp;#xA;  var range = activeSheet.getRange(rangeA1Notation);&amp;#xA;  var bg = range.getBackgrounds();&amp;#xA;  var values = range.getValues();&amp;#xA;  &amp;#xA;  var colorCellA1Notation = formula.match(/\,(.*)\)/).pop();&amp;#xA;  var colorCell = activeSheet.getRange(colorCellA1Notation);&amp;#xA;  var color = colorCell.getBackground();&amp;#xA;  &amp;#xA;  var total = 0;&amp;#xA;  &amp;#xA;  for(var i=0;i&amp;amp;lt;bg.length;i&amp;#x2B;&amp;#x2B;)&amp;#xA;    for(var j=0;j&amp;amp;lt;bg[0].length;j&amp;#x2B;&amp;#x2B;)&amp;#xA;      if( bg[i][j] == color )&amp;#xA;        total=total&amp;#x2B;(values[i][j]*1);&amp;#xA;  return total;&amp;#xA;};&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;How can I modify them to solve this issue?&amp;#xA;Tnanks!&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77836564&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Can a custom formula return an array that populates some cells with #ERROR but not others?&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Dave Hughes&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/2617819&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77836564/can-a-custom-formula-return-an-array-that-populates-some-cells-with-error-but-n" /&gt;
+        &lt;published&gt;2024-01-18T02:26:26Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-19T16:09:16Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;Is it possible for a custom formula to output an array where some output cells are populated with a &amp;lt;code&amp;gt;#ERROR&amp;lt;/code&amp;gt; error message, while others contain normal values?&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;My use case is that I&amp;#x27;m automatically ingesting a large array of raw inputs into one sheet. The custom formula cleans and pre-processes each cell of raw input into a more usable form in another sheet. A few inputs may be invalid and I want to flag these for the user to fix at source, but they shouldn&amp;#x27;t break the workflow of the valid inputs. A &amp;lt;code&amp;gt;#ERROR&amp;lt;/code&amp;gt; response is a familiar UX for this problem and I don&amp;#x27;t want to reinvent that wheel.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;h3&amp;gt;Example:&amp;lt;/h3&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Say I have a function &amp;lt;code&amp;gt;timesTwo(cell_or_range)&amp;lt;/code&amp;gt;, which can take either a single cell or a range, and emits something of the same shape (&amp;lt;a href=&amp;quot;https://developers.google.com/apps-script/guides/sheets/functions#optimization&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;this convention&amp;lt;/a&amp;gt;).&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre class=&amp;quot;lang-js prettyprint-override&amp;quot;&amp;gt;&amp;lt;code&amp;gt;function timesTwo(obj) {&amp;#xA;  if (Array.isArray(obj)){&amp;#xA;    return obj.map(timesTwo);&amp;#xA;  }&amp;#xA;  if (obj == 5) {&amp;#xA;    throw &amp;amp;quot;Three, sir!&amp;amp;quot;;&amp;#xA;  }&amp;#xA;  return obj * 2;&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Say I have the numbers {1, 2, 5, 3} in the range &amp;lt;code&amp;gt;A1:A4&amp;lt;/code&amp;gt;. 5 is an invalid input.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Desired behaviour:&amp;lt;/strong&amp;gt; I&amp;#x27;d like &amp;lt;code&amp;gt;=timesTwo(A1:A4)&amp;lt;/code&amp;gt; or &amp;lt;code&amp;gt;=ARRAYFORMULA(timesTwo(A1:A4))&amp;lt;/code&amp;gt; to generate &amp;lt;code&amp;gt;2, 4, #ERROR, 6&amp;lt;/code&amp;gt;.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Actual behaviour:&amp;lt;/strong&amp;gt; If the custom formula throws an exception, all outputs fail (obviously, because the function never returns its output array). &amp;lt;code&amp;gt;=timesTwo(A1:A4)&amp;lt;/code&amp;gt; results in single cell showing &amp;lt;code&amp;gt;#ERROR&amp;lt;/code&amp;gt;.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;code&amp;gt;=ARRAYFORMULA(timesTwo(A1:A4))&amp;lt;/code&amp;gt; does the same, but more complex formulas like &amp;lt;code&amp;gt;=ARRAYFORMULA(IF(NOT(ISBLANK(A1:A4)), timesTwo(A1:A4), &amp;amp;quot;whatever&amp;amp;quot;))&amp;lt;/code&amp;gt; may generate &amp;lt;code&amp;gt;#ERROR, #ERROR, #ERROR, #ERROR&amp;lt;/code&amp;gt;.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;h3&amp;gt;Alternatives / workarounds:&amp;lt;/h3&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I&amp;#x27;ve tried the following:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;em&amp;gt;Don&amp;#x27;t use ranges, just explicitly auto-fill the custom formula.&amp;lt;/em&amp;gt; Much, &amp;lt;em&amp;gt;much&amp;lt;/em&amp;gt; slower because it invokes the custom formula for each cell separately. Breaks if new data is ingested which extends beyond the auto-filled range.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;em&amp;gt;Output human-readable text indicating the error.&amp;lt;/em&amp;gt; (E.g. a literal string &amp;lt;code&amp;gt;&amp;amp;quot;#ERROR&amp;amp;quot;&amp;lt;/code&amp;gt;, as opposed to an error message.) Needs explicit handling in anything that consumes the output, so it&amp;#x27;s fragile. Needs conditional formatting to highlight for the user; doesn&amp;#x27;t have that nice cue of &amp;lt;code&amp;gt;#ERROR&amp;lt;/code&amp;gt; with a details popup on mouseover.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;em&amp;gt;Filter bad outputs out completely. Show them to the user elsewhere.&amp;lt;/em&amp;gt; Changes the shape of the data. Breaks the consistency of the custom function (it has to behave differently with arrays compared to scalar values).&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;h3&amp;gt;Remarks:&amp;lt;/h3&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Builtin functions do have the property I&amp;#x27;m looking for. For example, &amp;lt;code&amp;gt;=ARRAYFORMULA(1 / (A1:A4 - 5))&amp;lt;/code&amp;gt; gives &amp;lt;code&amp;gt;-0.25, -0.333, #DIV/0!, -0.5&amp;lt;/code&amp;gt;. &amp;lt;a href=&amp;quot;https://support.google.com/docs/answer/12504534&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;Named functions&amp;lt;/a&amp;gt; preserve this behaviour too. But they&amp;#x27;re not a workaround because if you can use them then you didn&amp;#x27;t need a custom function in the first place.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I think this question probably reduces to, &amp;amp;quot;Can a custom formula return a value, without throwing an exception, that generates a &amp;lt;code&amp;gt;#ERROR&amp;lt;/code&amp;gt;?&amp;amp;quot;&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77836019&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;convert google form timestamp to day-only date&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="javascript" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-forms" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;CCaux&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23260815&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77836019/convert-google-form-timestamp-to-day-only-date" /&gt;
+        &lt;published&gt;2024-01-17T23:03:45Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-18T01:19:28Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;when I save each google form entry in my linkde google sheet, it adds a column with the response&amp;#x27;s timestamp. What I see in that cell is something like this &amp;amp;quot;17/01/2024 20:55:23&amp;amp;quot;. When I print the content of this cell in AppsScript (through console.log()) I get something like this &amp;amp;quot;Wed Jan 17 2024 20:55:22 GMT&amp;#x2B;0100 (Central European Standard Time)&amp;amp;quot;.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;What I need is really to be able (in Apps Script) to compare the day in that cell to the current day (new Date()).&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;So far I haven&amp;#x27;t managed to do so in Apps Script. Not sure if I should use substrings to manually  extract the interesting part from the sheet&amp;#x27;s cell (i.e. the day), or if there&amp;#x27;s a built in function to get the day out of that string?&amp;#xA;In google sheet the TO_DATE(INT(A1)) function works wonderfully so ideally I&amp;#x27;m looking for something like this to use in Apps Script&amp;#xA;Thanks&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77835423&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Google sheets app script fails in template until re-saved&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;user1487861&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/1487861&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77835423/google-sheets-app-script-fails-in-template-until-re-saved" /&gt;
+        &lt;published&gt;2024-01-17T20:47:43Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-17T20:47:43Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;Having a weird error. I have a google sheet that has an app script so that when users check a box it also updates check boxes in another sheet. Here is a version with lots of logging turned on that isn&amp;#x27;t usually in the production version:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function onEdit(e) {&amp;#xA;   logEventObject(e);&amp;#xA;   var sheetInp1 = e.source.getSheetByName(&amp;amp;quot;Master-Clients&amp;amp;quot;);&amp;#xA;   var sheetOut = e.source.getSheetByName(&amp;amp;quot;full_list&amp;amp;quot;);&amp;#xA;&amp;#xA;   // Assuming checkboxes are in column 8 of Master-Clients. &amp;#xA;   var editedRange = e.range;&amp;#xA;   if (editedRange.getSheet().getName() === &amp;amp;quot;Master-Clients&amp;amp;quot; &amp;amp;amp;&amp;amp;amp; editedRange.getColumn() === 8) {&amp;#xA;       var isChecked = editedRange.getValue();&amp;#xA;       var matchingValue = sheetInp1.getRange(editedRange.getRow(), 2).getValue();&amp;#xA;       Logger.log(&amp;#x27;matchingValue: &amp;#x27; &amp;#x2B; matchingValue);&amp;#xA;&amp;#xA;       var dataOut = sheetOut.getDataRange().getValues();&amp;#xA;       Logger.log(&amp;#x27;length: &amp;#x27; &amp;#x2B; dataOut.length);&amp;#xA;       for (var i = 0; i &amp;amp;lt; dataOut.length; i&amp;#x2B;&amp;#x2B;) {&amp;#xA;           if(i === 10) {&amp;#xA;             Logger.log(&amp;#x27;check: &amp;#x27; &amp;#x2B; dataOut[i][1]);&amp;#xA;             Logger.log(&amp;#x27;check2: &amp;#x27; &amp;#x2B; sheetOut.getRange(i &amp;#x2B; 1, 27));&amp;#xA;           }&amp;#xA;           if (dataOut[i][1] === matchingValue) { // Assuming matching values are in column 2 of full_list, note different numbering convention&amp;#xA;               sheetOut.getRange(i &amp;#x2B; 1, 27).setValue(isChecked);&amp;#xA;           }&amp;#xA;       }&amp;#xA;   }&amp;#xA;}&amp;#xA;&amp;#xA;function logEventObject(e) {&amp;#xA;   if (e) {&amp;#xA;       Logger.log(&amp;#x27;Range: &amp;#x27; &amp;#x2B; e.range.getA1Notation());&amp;#xA;       Logger.log(&amp;#x27;Value: &amp;#x27; &amp;#x2B; e.value);&amp;#xA;       Logger.log(&amp;#x27;Sheet name: &amp;#x27; &amp;#x2B; e.range.getSheet().getName());&amp;#xA;       // Log other properties as needed&amp;#xA;   } else {&amp;#xA;       Logger.log(&amp;#x27;Event object is null or undefined&amp;#x27;);&amp;#xA;   }&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;This code works fine. It is saved in a template file.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Then, I use python to copy the template file and add in the latest data from our database. This is the relevant code that creates the file from the template containing the app script:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;    copied_file = drive_service.files().copy(&amp;#xA;        fileId=TEMPLATE_FILE,&amp;#xA;        body={&amp;#x27;name&amp;#x27;: new_file_name, &amp;#x27;parents&amp;#x27;: [folder_id]},&amp;#xA;        supportsAllDrives=True&amp;#xA;    ).execute()&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Here is the problem:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;ol&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;&amp;lt;p&amp;gt;When I open the new file, the code doesn&amp;#x27;t work. In the log, the status is failed. When I look at the cloud logs I get the message: &amp;amp;quot;No logs are available for this execution&amp;#xA;For recent executions there may be some delay in log availability.&amp;amp;quot; I waited 12 hours, still no logs.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;&amp;lt;p&amp;gt;But, if I open the code, make any meaningless change like adding another space into a comment and then save the code, it starts working.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;/ol&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Any ideas on what the problem might be, or a work-around that doesn&amp;#x27;t involve asking the first user to edit the app script?&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77835045&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;-1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;How to change a list so that .setValues will display it in a specific range on a Google Sheet?&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-workspace" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;CORE Interpreters&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23260069&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77835045/how-to-change-a-list-so-that-setvalues-will-display-it-in-a-specific-range-on-a" /&gt;
+        &lt;published&gt;2024-01-17T19:31:47Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-17T21:20:07Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I&amp;#x27;m basically a beginner with coding and Google Apps Script and have hit the limits of my abilities. I have a list of values in Column A on sheet 1, and a second list (subset) in Column A on sheet 2. Sheet 1 is updated manually and includes a record number, file name, and color. Sheet 2 is only files designated &amp;amp;quot;blue&amp;amp;quot; in the color column and the goal is to run a check that makes sure that all record numbers for blue files from sheet 1 are on sheet 2, and if not, to add them.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Edited to add:&amp;#xA;samplefile: &amp;lt;a href=&amp;quot;https://docs.google.com/spreadsheets/d/1ji3R24V5y7j--1icUc4DpzOtulnEK9qT5N92lhuYSLI/edit?usp=viewing&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;https://docs.google.com/spreadsheets/d/1ji3R24V5y7j--1icUc4DpzOtulnEK9qT5N92lhuYSLI/edit?usp=viewing&amp;lt;/a&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Here&amp;#x27;s what I&amp;#x27;ve got so far:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;    var ss = SpreadsheetApp.getActiveSpreadsheet();&amp;#xA;    var masterSheet = ss.getSheetByName(&amp;#x27;MasterList&amp;#x27;);  &amp;#xA;    var blueSheet = ss.getSheetByName(&amp;#x27;blue&amp;#x27;);&amp;#xA;&amp;#xA;    var records = masterSheet.getDataRange().getValues();&amp;#xA;&amp;#xA;    var lastBlue = blueSheet.getLastRow();&amp;#xA;    var blueListAssigned = blueSheet.getRange(2,1,lastBlue-1, 1).getValues().flat();&amp;#xA;&amp;#xA;&amp;#xA;    function getBluesOnly() {&amp;#xA;      var allBlue = [];&amp;#xA;      var newBlue = [];&amp;#xA;      var colorColumn = records[0].indexOf(&amp;amp;quot;color&amp;amp;quot;);&amp;#xA;      var recordColumn = records[0].indexOf(&amp;amp;quot;record&amp;amp;quot;);&amp;#xA;&amp;#xA;      Logger.log(&amp;#x27;all records: &amp;#x27; &amp;#x2B;records);&amp;#xA;      Logger.log(&amp;#x27;Blue finished &amp;#x27; &amp;#x2B;blueListAssigned);&amp;#xA;&amp;#xA;&amp;#xA;     //Only keep records from MasterList when color is blue&amp;#xA;   &amp;#xA;      records.filter (function (row) {&amp;#xA;        return (row[colorColumn] === &amp;amp;quot;blue&amp;amp;quot;);&amp;#xA;        })&amp;#xA;       &amp;#xA;      .forEach(function (row) {&amp;#xA;      var newBlueRecord = row[recordColumn];&amp;#xA;      allBlue.push(newBlueRecord);&amp;#xA;   &amp;#xA;        });&amp;#xA;    &amp;#xA;      Logger.log(&amp;#x27;All Blue Records: &amp;#x27;&amp;#x2B;allBlue);&amp;#xA;&amp;#xA;      //Check to see if blue records from MasterList are already on the Blue Sheet (assigned to blue)&amp;#xA;  &amp;#xA;      allBlue.forEach(function(each){&amp;#xA;       if(!blueListAssigned.includes(each))&amp;#xA;       {newBlue.push(each)}&amp;#xA;       &amp;#xA;        });&amp;#xA;  &amp;#xA;      Logger.log(&amp;#x27;New Blues to add: &amp;#x27; &amp;#x2B;newBlue);&amp;#xA;&amp;#xA;&amp;#xA;      var firstBlankRow = blueSheet.getRange(lastBlue&amp;#x2B;1, 1, newBlue.length,1);&amp;#xA;      var postNewBlues = blueSheet.setActiveRange(firstBlankRow);&amp;#xA;&amp;#xA;      postNewBlues.setValues(newBlue);&amp;#xA;&amp;#xA;&amp;#xA;    };&amp;#xA;&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;When I run this, all the logs show that all lists have the correct records in them, but then at the end I get this error:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Exception: The parameters (number[]) don&amp;#x27;t match the method signature for SpreadsheetApp.Range.setValues.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;How do I change the parameters of newBlue so that those items can be added to the spreadsheet?&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;(I&amp;#x27;m also open to completely different strategies for accomplishing this goal if there&amp;#x27;s a better approach)&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77833438&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;How to count misspelled words in a google sheets cell&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="count" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="misspelling" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Jazzmine&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/916652&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77833438/how-to-count-misspelled-words-in-a-google-sheets-cell" /&gt;
+        &lt;published&gt;2024-01-17T15:01:28Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-17T16:24:57Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;Is there a way to count misspelled words in a google sheets cell?&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;If cell A1 contains &amp;#x27;hello.  ther are a lot of missspelleed wrds in ths cell&amp;#x27; and I put the formula in A2, I&amp;#x27;d like the formula to return a 4 in A2 for the 4 misspelled words in A1.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I&amp;#x27;ve tried this but only received a 1 in A2:&amp;#xA;=SUM(IF(ISERR(SPELLING(SPLIT(A1, &amp;amp;quot; &amp;amp;quot;))), 1, 0))&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;and this:&amp;#xA;=ARRAYFORMULA(SUM(IF(ISERR(SPELLING(SPLIT(A1, &amp;amp;quot; &amp;amp;quot;))), 1, 0)))&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I want to apply the formula to all the cells in one column.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Thanks&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77832705&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;Creating a form on google app script and although I have added styling for mobile screen, it&amp;#x27;s not being applied in mobile view in the app script&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="html" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="css" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;re4per&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/16491890&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77832705/creating-a-form-on-google-app-script-and-although-i-have-added-styling-for-mobil" /&gt;
+        &lt;published&gt;2024-01-17T13:12:26Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-17T13:58:18Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I want to create a form on google app script which is connected to the spreadsheet. everything works fine just that the mobile view for the deployed application on google script is not applying the styling i have created for small screens: @media only screen and (max-width: 768px). Although in svaing the code as html file and opening in browser in mobile view its working fine.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Index.html:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;&amp;amp;lt;!DOCTYPE html&amp;amp;gt;&amp;#xA;&amp;amp;lt;html&amp;amp;gt;&amp;#xA;&amp;#xA;&amp;amp;lt;head&amp;amp;gt;&amp;#xA;  &amp;amp;lt;base target=&amp;amp;quot;_top&amp;amp;quot;&amp;amp;gt;&amp;#xA;  &amp;amp;lt;meta name=&amp;amp;quot;viewport&amp;amp;quot; content=&amp;amp;quot;width=device-width, initial-scale=1&amp;amp;quot;&amp;amp;gt;&amp;#xA;  &amp;amp;lt;style&amp;amp;gt;&amp;#xA;    body {&amp;#xA;      font-family: Arial, sans-serif;&amp;#xA;      margin: 20px;&amp;#xA;    }&amp;#xA;&amp;#xA;    h2 {&amp;#xA;      text-align: center;&amp;#xA;    }&amp;#xA;&amp;#xA;    label {&amp;#xA;      display: block;&amp;#xA;      margin-bottom: 5px;&amp;#xA;    }&amp;#xA;&amp;#xA;    input,&amp;#xA;    select {&amp;#xA;      width: 30%;&amp;#xA;      padding: 8px;&amp;#xA;      margin-bottom: 10px;&amp;#xA;      box-sizing: border-box;&amp;#xA;    }&amp;#xA;&amp;#xA;    #itemDetailsTable input,&amp;#xA;    #itemDetailsTable select {&amp;#xA;      width: 90%;&amp;#xA;      text-align: center;&amp;#xA;      padding: 8px;&amp;#xA;      margin-bottom: 10px;&amp;#xA;      box-sizing: border-box;&amp;#xA;    }&amp;#xA;&amp;#xA;    table {&amp;#xA;      width: 100%;&amp;#xA;      border-collapse: collapse;&amp;#xA;      margin-top: 15px;&amp;#xA;    }&amp;#xA;&amp;#xA;    th,&amp;#xA;    td {&amp;#xA;      border: 1px solid #ddd;&amp;#xA;      padding: 8px;&amp;#xA;      text-align: center;&amp;#xA;    }&amp;#xA;&amp;#xA;    input[type=&amp;amp;quot;button&amp;amp;quot;] {&amp;#xA;      background-color: #4CAF50;&amp;#xA;      color: white;&amp;#xA;      padding: 10px 20px;&amp;#xA;      border: none;&amp;#xA;      border-radius: 4px;&amp;#xA;      cursor: pointer;&amp;#xA;    }&amp;#xA;&amp;#xA;    input[type=&amp;amp;quot;button&amp;amp;quot;]:hover {&amp;#xA;      background-color: #45a049;&amp;#xA;    }&amp;#xA;&amp;#xA;    #EnquiryCaptureForm {&amp;#xA;      display: flex;&amp;#xA;      flex-direction: column;&amp;#xA;      align-items: center;&amp;#xA;    }&amp;#xA;&amp;#xA;    .logo-container {&amp;#xA;      display: flex;&amp;#xA;      justify-content: center;&amp;#xA;      margin-bottom: 20px; /* Add some space between logo and form */&amp;#xA;    }&amp;#xA;&amp;#xA;    /* Media query for mobile view */&amp;#xA;@media only screen and (max-width: 768px) {&amp;#xA;  body {&amp;#xA;    width: 100%;&amp;#xA;  }&amp;#xA;&amp;#xA;  #EnquiryCaptureForm input,&amp;#xA;  #EnquiryCaptureForm select {&amp;#xA;    width: 90%;&amp;#xA;    box-sizing: border-box;&amp;#xA;  }&amp;#xA;&amp;#xA;    #itemDetailsTable input,&amp;#xA;  #itemDetailsTable select {&amp;#xA;    width: 100%;&amp;#xA;    box-sizing: border-box;&amp;#xA;  }&amp;#xA;&amp;#xA;  #itemDetailsTable td {&amp;#xA;    display: block;&amp;#xA;    margin-bottom: 10px;&amp;#xA;  }&amp;#xA;&amp;#xA;  #itemDetailsTable select {&amp;#xA;    margin-bottom: 10px;&amp;#xA;  }&amp;#xA;&amp;#xA;  #itemDetailsTable input[type=&amp;amp;quot;number&amp;amp;quot;],&amp;#xA;  #itemDetailsTable input[type=&amp;amp;quot;text&amp;amp;quot;] {&amp;#xA;    width: 100%;&amp;#xA;    box-sizing: border-box;&amp;#xA;    margin-bottom: 10px;&amp;#xA;  }&amp;#xA;&amp;#xA;  #itemDetailsTable th,&amp;#xA;  #itemDetailsTable td {&amp;#xA;    display: block;&amp;#xA;    width: 100%;&amp;#xA;    box-sizing: border-box;&amp;#xA;  }&amp;#xA;&amp;#xA;  #itemDetailsTable th {&amp;#xA;    text-align: left;&amp;#xA;  }&amp;#xA;}&amp;#xA;  &amp;amp;lt;/style&amp;amp;gt;&amp;#xA;&amp;#xA;&amp;amp;lt;/head&amp;amp;gt;&amp;#xA;&amp;#xA;&amp;amp;lt;body&amp;amp;gt;&amp;#xA;  &amp;amp;lt;div class=&amp;amp;quot;logo-container&amp;amp;quot;&amp;amp;gt;&amp;#xA;    &amp;amp;lt;img src=&amp;amp;quot;https://static.vecteezy.com/system/resources/previews/000/626/940/original/circle-logo-vector-templates.jpg&amp;amp;quot; alt=&amp;amp;quot;Description&amp;amp;quot; style=&amp;amp;quot;width: 200px; height: auto;&amp;amp;quot;&amp;amp;gt;&amp;#xA;  &amp;amp;lt;/div&amp;amp;gt;&amp;#xA;&amp;#xA;  &amp;amp;lt;h2&amp;amp;gt;Enquiry Capture Form&amp;amp;lt;/h2&amp;amp;gt;&amp;#xA;  &amp;amp;lt;form id=&amp;amp;quot;EnquiryCaptureForm&amp;amp;quot;&amp;amp;gt;&amp;#xA;  &amp;amp;lt;label for=&amp;amp;quot;referenceCode&amp;amp;quot;&amp;amp;gt;Reference Code:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;  &amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;referenceCode&amp;amp;quot; name=&amp;amp;quot;referenceCode&amp;amp;quot; readonly&amp;amp;gt;&amp;#xA;    &amp;amp;lt;br&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;pINumber&amp;amp;quot;&amp;amp;gt;PI Number:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;select id=&amp;amp;quot;pINumber&amp;amp;quot; name=&amp;amp;quot;pINumber&amp;amp;quot; required&amp;amp;gt;&amp;#xA;    &amp;amp;lt;option value=&amp;amp;quot;   &amp;amp;quot;&amp;amp;gt;  &amp;amp;lt;/option&amp;amp;gt;&amp;#xA;    &amp;amp;lt;option value=&amp;amp;quot;To Be Made&amp;amp;quot;&amp;amp;gt; To Be Made &amp;amp;lt;/option&amp;amp;gt;&amp;#xA;    &amp;amp;lt;option value=&amp;amp;quot;not Required&amp;amp;quot;&amp;amp;gt; Not Required &amp;amp;lt;/option&amp;amp;gt;&amp;#xA;    &amp;amp;lt;/select&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;clientName&amp;amp;quot;&amp;amp;gt;Client Name:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;clientName&amp;amp;quot; name=&amp;amp;quot;clientName&amp;amp;quot; required&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;architectName&amp;amp;quot;&amp;amp;gt;Architect Name:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;architectName&amp;amp;quot; name=&amp;amp;quot;architectName&amp;amp;quot; required&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;clientPhoneNumber&amp;amp;quot;&amp;amp;gt;Client Phone Number:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;clientPhoneNumber&amp;amp;quot; name=&amp;amp;quot;clientPhoneNumber&amp;amp;quot; required&amp;amp;gt;&amp;#xA;  &amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;architectPhoneNumber&amp;amp;quot;&amp;amp;gt;Architect Phone Number:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;architectPhoneNumber&amp;amp;quot; name=&amp;amp;quot;architectPhoneNumber&amp;amp;quot;&amp;amp;gt;&amp;#xA;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;clientmailid&amp;amp;quot;&amp;amp;gt;Client Mail id:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;mail&amp;amp;quot; id=&amp;amp;quot;clientmailid&amp;amp;quot; name=&amp;amp;quot;clientmailid&amp;amp;quot; required&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;architectmailid&amp;amp;quot;&amp;amp;gt;Architect Mail id:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;mail&amp;amp;quot; id=&amp;amp;quot;architectmailid&amp;amp;quot; name=&amp;amp;quot;architectmailid&amp;amp;quot;&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;clientCompanyName&amp;amp;quot;&amp;amp;gt;Client Company Name:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;clientCompanyName&amp;amp;quot; name=&amp;amp;quot;clientCompanyName&amp;amp;quot; required&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;referenceName&amp;amp;quot;&amp;amp;gt;Reference Name :&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;select id=&amp;amp;quot;referenceName&amp;amp;quot; name=&amp;amp;quot;referenceName&amp;amp;quot; required&amp;amp;gt;&amp;#xA;       &amp;amp;lt;option value=&amp;amp;quot;   &amp;amp;quot;&amp;amp;gt;  &amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;architect&amp;amp;quot;&amp;amp;gt;Architect&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;walking&amp;amp;quot;&amp;amp;gt;walking&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;online&amp;amp;quot;&amp;amp;gt;Online&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;client&amp;amp;quot;&amp;amp;gt;Client&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;management&amp;amp;quot;&amp;amp;gt;Management&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;repeatclient&amp;amp;quot;&amp;amp;gt;Repeat client&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;other&amp;amp;quot;&amp;amp;gt;other&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;    &amp;amp;lt;/select&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;referencepersonName&amp;amp;quot;&amp;amp;gt;Reference Person Name:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;referencepersonName&amp;amp;quot; name=&amp;amp;quot;referencepersonName&amp;amp;quot; required&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;salesPersonName&amp;amp;quot;&amp;amp;gt;Sales Person Name:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;select id=&amp;amp;quot;salesPersonName&amp;amp;quot; name=&amp;amp;quot;salesPersonName&amp;amp;quot; required&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;   &amp;amp;quot;&amp;amp;gt;  &amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;anjali&amp;amp;quot;&amp;amp;gt;Anjali&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;rupesh&amp;amp;quot;&amp;amp;gt;Rupesh&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;sameer&amp;amp;quot;&amp;amp;gt;Sameer&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;other&amp;amp;quot;&amp;amp;gt;Other&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;    &amp;amp;lt;/select&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;projectType&amp;amp;quot;&amp;amp;gt;Project Type:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;select id=&amp;amp;quot;projectType&amp;amp;quot; name=&amp;amp;quot;projectType&amp;amp;quot; onchange=&amp;amp;quot;toggleOtherProjectType(this)&amp;amp;quot; required&amp;amp;gt;&amp;#xA;       &amp;amp;lt;option value=&amp;amp;quot;   &amp;amp;quot;&amp;amp;gt;  &amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;home&amp;amp;quot;&amp;amp;gt;Home&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;office&amp;amp;quot;&amp;amp;gt;Office&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;      &amp;amp;lt;option value=&amp;amp;quot;other&amp;amp;quot;&amp;amp;gt;Other&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;    &amp;amp;lt;/select&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;otherProjectType&amp;amp;quot; name=&amp;amp;quot;otherProjectType&amp;amp;quot; style=&amp;amp;quot;display: none;&amp;amp;quot; placeholder=&amp;amp;quot;Enter custom project type&amp;amp;quot;&amp;amp;gt;&amp;#xA;&amp;#xA;&amp;#xA;    &amp;amp;lt;label for=&amp;amp;quot;leadTime&amp;amp;quot;&amp;amp;gt;Lead Time in days:&amp;amp;lt;/label&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;number&amp;amp;quot; id=&amp;amp;quot;leadTime&amp;amp;quot; name=&amp;amp;quot;leadTimeindays&amp;amp;quot; required&amp;amp;gt;&amp;#xA;&amp;#xA;&amp;#xA;    &amp;amp;lt;h3&amp;amp;gt;Item Details&amp;amp;lt;/h3&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;table id=&amp;amp;quot;itemDetailsTable&amp;amp;quot;&amp;amp;gt;&amp;#xA;      &amp;amp;lt;tr&amp;amp;gt;&amp;#xA;        &amp;amp;lt;th&amp;amp;gt;Item&amp;amp;lt;/th&amp;amp;gt;&amp;#xA;        &amp;amp;lt;th&amp;amp;gt;Rate&amp;amp;lt;/th&amp;amp;gt;&amp;#xA;        &amp;amp;lt;th&amp;amp;gt;Qty&amp;amp;lt;/th&amp;amp;gt;&amp;#xA;        &amp;amp;lt;th&amp;amp;gt;GST (18%)&amp;amp;lt;/th&amp;amp;gt; &amp;#xA;        &amp;amp;lt;th&amp;amp;gt;Total&amp;amp;lt;/th&amp;amp;gt;&amp;#xA;        &amp;amp;lt;th&amp;amp;gt;Remarks&amp;amp;lt;/th&amp;amp;gt;&amp;#xA;        &amp;amp;lt;th&amp;amp;gt;Action&amp;amp;lt;/th&amp;amp;gt;&amp;#xA;      &amp;amp;lt;/tr&amp;amp;gt;&amp;#xA;      &amp;amp;lt;tr&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td&amp;amp;gt;&amp;#xA;            &amp;amp;lt;select id=&amp;amp;quot;item1&amp;amp;quot; name=&amp;amp;quot;item1&amp;amp;quot; onchange=&amp;amp;quot;toggleOtherItemInput(1)&amp;amp;quot;&amp;amp;gt;&amp;#xA;            &amp;amp;lt;option value=&amp;amp;quot;    &amp;amp;quot;&amp;amp;gt;    &amp;amp;lt;/option&amp;amp;gt;   &amp;#xA;            &amp;amp;lt;option value=&amp;amp;quot;Arg_HB-28000&amp;amp;quot;&amp;amp;gt;Argon_HB-28000&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;            &amp;amp;lt;option value=&amp;amp;quot;Ath_MB-14000&amp;amp;quot;&amp;amp;gt;Athens_MB-14000&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;            &amp;amp;lt;option value=&amp;amp;quot;other&amp;amp;quot;&amp;amp;gt;Other&amp;amp;lt;/option&amp;amp;gt;&amp;#xA;            &amp;amp;lt;/select&amp;amp;gt;&amp;#xA;            &amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;otherItem1&amp;amp;quot; name=&amp;amp;quot;otherItem1&amp;amp;quot; style=&amp;amp;quot;display:none;&amp;amp;quot; placeholder=&amp;amp;quot;Enter custom item&amp;amp;quot;&amp;amp;gt;&amp;#xA;            &amp;amp;lt;/td&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td&amp;amp;gt;&amp;amp;lt;input type=&amp;amp;quot;number&amp;amp;quot; id=&amp;amp;quot;rate1&amp;amp;quot; name=&amp;amp;quot;rate1&amp;amp;quot; oninput=&amp;amp;quot;calculateTotal(1)&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td&amp;amp;gt;&amp;amp;lt;input type=&amp;amp;quot;number&amp;amp;quot; id=&amp;amp;quot;qty1&amp;amp;quot; name=&amp;amp;quot;qty1&amp;amp;quot; oninput=&amp;amp;quot;calculateTotal(1)&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td&amp;amp;gt;&amp;amp;lt;input type=&amp;amp;quot;number&amp;amp;quot; id=&amp;amp;quot;gst1&amp;amp;quot; name=&amp;amp;quot;gst1&amp;amp;quot; readonly&amp;amp;gt;&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td&amp;amp;gt;&amp;amp;lt;input type=&amp;amp;quot;number&amp;amp;quot; id=&amp;amp;quot;total1&amp;amp;quot; name=&amp;amp;quot;total1&amp;amp;quot; readonly&amp;amp;gt;&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td&amp;amp;gt;&amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;remarks1&amp;amp;quot; name=&amp;amp;quot;remarks1&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;          &amp;amp;lt;td&amp;amp;gt;&amp;amp;lt;input type=&amp;amp;quot;button&amp;amp;quot; value=&amp;amp;quot;Delete&amp;amp;quot; class=&amp;amp;quot;delete-btn&amp;amp;quot; onclick=&amp;amp;quot;deleteRow(this)&amp;amp;quot;&amp;amp;gt;&amp;amp;lt;/td&amp;amp;gt;&amp;#xA;       &amp;amp;lt;/tr&amp;amp;gt;&amp;#xA;       &amp;amp;lt;/table&amp;amp;gt; &amp;#xA;     &amp;#xA;    &amp;amp;lt;br&amp;amp;gt;&amp;#xA;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;button&amp;amp;quot; value=&amp;amp;quot;Add Row&amp;amp;quot; onclick=&amp;amp;quot;addRow()&amp;amp;quot;&amp;amp;gt;&amp;#xA;    &amp;amp;lt;input type=&amp;amp;quot;button&amp;amp;quot; value=&amp;amp;quot;Submit&amp;amp;quot; onclick=&amp;amp;quot;submitForm()&amp;amp;quot;&amp;amp;gt;&amp;#xA;  &amp;amp;lt;/form&amp;amp;gt;&amp;#xA;&amp;#xA;  &amp;amp;lt;script&amp;amp;gt;&amp;#xA;    document.addEventListener(&amp;#x27;DOMContentLoaded&amp;#x27;, function () {&amp;#xA;  var table = document.getElementById(&amp;amp;quot;itemDetailsTable&amp;amp;quot;);&amp;#xA;&amp;#xA;  // Add an event listener for the delete button click event&amp;#xA;  table.addEventListener(&amp;amp;quot;click&amp;amp;quot;, function (e) {&amp;#xA;    if (e.target.tagName === &amp;amp;quot;INPUT&amp;amp;quot; &amp;amp;amp;&amp;amp;amp; e.target.classList.contains(&amp;amp;quot;delete-btn&amp;amp;quot;)) {&amp;#xA;      deleteRow(e.target);&amp;#xA;    }&amp;#xA;  });&amp;#xA;});&amp;#xA;&amp;#xA;function deleteRow(button) {&amp;#xA;  var row = button.closest(&amp;#x27;tr&amp;#x27;); // Find the closest parent &amp;#x27;tr&amp;#x27; element&amp;#xA;  var table = row.parentNode; // Get the table that contains the row&amp;#xA;  var rowIndex = row.rowIndex;&amp;#xA;&amp;#xA;  // Ensure there are more than one rows before allowing deletion&amp;#xA;  if (table.rows.length &amp;amp;gt; 1) {&amp;#xA;    table.deleteRow(rowIndex);&amp;#xA;  } else {&amp;#xA;    alert(&amp;amp;quot;Cannot delete the only row&amp;amp;quot;);&amp;#xA;  }&amp;#xA;}&amp;#xA;&amp;#xA; function toggleOtherProjectType(select) {&amp;#xA;    var otherProjectTypeInput = document.getElementById(&amp;#x27;otherProjectType&amp;#x27;);&amp;#xA;    if (select.value === &amp;#x27;other&amp;#x27;) {&amp;#xA;      otherProjectTypeInput.style.display = &amp;#x27;block&amp;#x27;;&amp;#xA;      otherProjectTypeInput.required = true;&amp;#xA;    } else {&amp;#xA;      otherProjectTypeInput.style.display = &amp;#x27;none&amp;#x27;; &amp;#xA;      otherProjectTypeInput.required = false;&amp;#xA;    }&amp;#xA;  }&amp;#xA;&amp;#xA;  function toggleOtherItemInput(rowNumber) {&amp;#xA;    console.log(&amp;amp;quot;Toggling other item input for row: &amp;amp;quot;, rowNumber); // This should log every time you change the selection.&amp;#xA;  var itemSelect = document.getElementById(&amp;#x27;item&amp;#x27; &amp;#x2B; rowNumber);&amp;#xA;  var otherItemInput = document.getElementById(&amp;#x27;otherItem&amp;#x27; &amp;#x2B; rowNumber);&amp;#xA;  if(itemSelect.value === &amp;#x27;other&amp;#x27;) {&amp;#xA;    otherItemInput.style.display = &amp;#x27;inline&amp;#x27;; // Show the text input&amp;#xA;  } else {&amp;#xA;    otherItemInput.style.display = &amp;#x27;none&amp;#x27;; // Hide the text input&amp;#xA;    otherItemInput.value = &amp;#x27;&amp;#x27;; // Clear any text that was entered&amp;#xA;  }&amp;#xA;}&amp;#xA;&amp;#xA;&amp;#xA;      function generateUniqueCode() {&amp;#xA;  var uniqueCode = &amp;#x27;&amp;#x27;;&amp;#xA;  var characters = &amp;#x27;ABCDEFGHIJKLMNOPQRSTUVWXYZ&amp;#x27;; // Alphabets for the code&amp;#xA;  var digits = &amp;#x27;0123456789&amp;#x27;; // Digits for the code&amp;#xA;&amp;#xA;  // Generating one random alphabet character&amp;#xA;  var randomChar = characters.charAt(Math.floor(Math.random() * characters.length));&amp;#xA;  uniqueCode &amp;#x2B;= randomChar;&amp;#xA;&amp;#xA;  // Generating four random digits&amp;#xA;  for (var i = 0; i &amp;amp;lt; 4; i&amp;#x2B;&amp;#x2B;) {&amp;#xA;    var randomDigit = digits.charAt(Math.floor(Math.random() * digits.length));&amp;#xA;    uniqueCode &amp;#x2B;= randomDigit;&amp;#xA;  }&amp;#xA;&amp;#xA;  return uniqueCode;&amp;#xA;}&amp;#xA;&amp;#xA;    function displayUniqueCode() {&amp;#xA;      var uniqueResponseCode = generateUniqueCode();&amp;#xA;      document.getElementById(&amp;#x27;referenceCode&amp;#x27;).value = uniqueResponseCode;&amp;#xA;    }&amp;#xA;&amp;#xA;    // Function to execute when the page loads&amp;#xA;    window.onload = displayUniqueCode;&amp;#xA;&amp;#xA;    function updateTotalAndGST(row) {&amp;#xA;    var rate = parseFloat(row.querySelector(&amp;#x27;[name^=&amp;amp;quot;rate&amp;amp;quot;]&amp;#x27;).value) || 0;&amp;#xA;    var qty = parseFloat(row.querySelector(&amp;#x27;[name^=&amp;amp;quot;qty&amp;amp;quot;]&amp;#x27;).value) || 0;&amp;#xA;&amp;#xA;    var totalAmount = rate * qty;&amp;#xA;    var gstAmount = totalAmount * 0.18;&amp;#xA;    var totalWithGST = totalAmount &amp;#x2B; gstAmount;&amp;#xA;&amp;#xA;    row.querySelector(&amp;#x27;[name^=&amp;amp;quot;gst&amp;amp;quot;]&amp;#x27;).value = gstAmount.toFixed(2);&amp;#xA;    row.querySelector(&amp;#x27;[name^=&amp;amp;quot;total&amp;amp;quot;]&amp;#x27;).value = totalWithGST.toFixed(2);&amp;#xA;  }&amp;#xA;&amp;#xA;   document.addEventListener(&amp;#x27;DOMContentLoaded&amp;#x27;, function () {&amp;#xA;      var table = document.getElementById(&amp;amp;quot;itemDetailsTable&amp;amp;quot;);&amp;#xA;&amp;#xA;      // Add an event listener for the delete button click event&amp;#xA;      table.addEventListener(&amp;amp;quot;click&amp;amp;quot;, function (e) {&amp;#xA;        if (e.target.tagName === &amp;amp;quot;INPUT&amp;amp;quot; &amp;amp;amp;&amp;amp;amp; e.target.classList.contains(&amp;amp;quot;delete-btn&amp;amp;quot;)) {&amp;#xA;          deleteRow(e.target);&amp;#xA;        }&amp;#xA;      });&amp;#xA;    });&amp;#xA;&amp;#xA;    function addRow() {&amp;#xA;      var table = document.getElementById(&amp;amp;quot;itemDetailsTable&amp;amp;quot;);&amp;#xA;      var rowCount = table.rows.length;&amp;#xA;&amp;#xA;      var newRow = table.insertRow(rowCount);&amp;#xA;&amp;#xA;      var cell1 = newRow.insertCell(0);&amp;#xA;      var cell2 = newRow.insertCell(1);&amp;#xA;      var cell3 = newRow.insertCell(2);&amp;#xA;      var cell4 = newRow.insertCell(3);&amp;#xA;      var cell5 = newRow.insertCell(4);&amp;#xA;      var cell6 = newRow.insertCell(5);&amp;#xA;      var cell7 = newRow.insertCell(6);&amp;#xA;      // var cell8 = newRow.insertCell(7);&amp;#xA;      // var cell9 = newRow.insertCell(8);&amp;#xA;&amp;#xA;cell1.innerHTML = &amp;#x27;&amp;amp;lt;select id=&amp;amp;quot;item&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; name=&amp;amp;quot;item&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; onchange=&amp;amp;quot;toggleOtherItemInput(&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;)&amp;amp;quot;&amp;amp;gt;&amp;#x27; &amp;#x2B;&amp;#xA;      &amp;#x27;&amp;amp;lt;option value=&amp;amp;quot;    &amp;amp;quot;&amp;amp;gt;    &amp;amp;lt;/option&amp;amp;gt;&amp;#x27; &amp;#x2B;  &amp;#xA;      &amp;#x27;&amp;amp;lt;option value=&amp;amp;quot;Arg_HB-28000&amp;amp;quot;&amp;amp;gt;Argon_HB-28000&amp;amp;lt;/option&amp;amp;gt;&amp;#x27; &amp;#x2B;&amp;#xA;      &amp;#x27;&amp;amp;lt;option value=&amp;amp;quot;Ath_MB-14000&amp;amp;quot;&amp;amp;gt;Athens_MB-14000&amp;amp;lt;/option&amp;amp;gt;&amp;#x27; &amp;#x2B;&amp;#xA;           &amp;#x27;&amp;amp;lt;option value=&amp;amp;quot;other&amp;amp;quot;&amp;amp;gt;Other&amp;amp;lt;/option&amp;amp;gt;&amp;#x27; &amp;#x2B;&amp;#xA;      &amp;#x27;&amp;amp;lt;/select&amp;amp;gt;&amp;#x27; &amp;#x2B; // Ensure the &amp;#x27;&amp;#x2B;&amp;#x27; operator is correctly used to concatenate the next line&amp;#xA;      &amp;#x27;&amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;otherItem&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; name=&amp;amp;quot;otherItem&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; style=&amp;amp;quot;display:none;&amp;amp;quot; placeholder=&amp;amp;quot;Enter custom item&amp;amp;quot;&amp;amp;gt;&amp;#x27;;     &amp;#xA;      cell2.innerHTML = &amp;#x27;&amp;amp;lt;input type=&amp;amp;quot;number&amp;amp;quot; id=&amp;amp;quot;rate&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; name=&amp;amp;quot;rate&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; oninput=&amp;amp;quot;calculateTotal(&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;)&amp;amp;quot;&amp;amp;gt;&amp;#x27;;&amp;#xA;      cell3.innerHTML = &amp;#x27;&amp;amp;lt;input type=&amp;amp;quot;number&amp;amp;quot; id=&amp;amp;quot;qty&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; name=&amp;amp;quot;qty&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; oninput=&amp;amp;quot;calculateTotal(&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;)&amp;amp;quot;&amp;amp;gt;&amp;#x27;;&amp;#xA;      cell4.innerHTML = &amp;#x27;&amp;amp;lt;input type=&amp;amp;quot;number&amp;amp;quot; id=&amp;amp;quot;gst&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; name=&amp;amp;quot;gst&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; readonly&amp;amp;gt;&amp;#x27;;&amp;#xA;      cell5.innerHTML = &amp;#x27;&amp;amp;lt;input type=&amp;amp;quot;number&amp;amp;quot; id=&amp;amp;quot;total&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; name=&amp;amp;quot;total&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; readonly&amp;amp;gt;&amp;#x27;;&amp;#xA;      cell6.innerHTML = &amp;#x27;&amp;amp;lt;input type=&amp;amp;quot;text&amp;amp;quot; id=&amp;amp;quot;remarks&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot; name=&amp;amp;quot;remarks&amp;#x27; &amp;#x2B; rowCount &amp;#x2B; &amp;#x27;&amp;amp;quot;&amp;amp;gt;&amp;#x27;;&amp;#xA;      cell7.innerHTML = &amp;#x27;&amp;amp;lt;input type=&amp;amp;quot;button&amp;amp;quot; value=&amp;amp;quot;Delete&amp;amp;quot; class=&amp;amp;quot;delete-btn&amp;amp;quot; onclick=&amp;amp;quot;deleteRow(this.parentNode.parentNode)&amp;amp;quot;&amp;amp;gt;&amp;#x27;; //Pass the current row to the deleteRow function&amp;#xA;&amp;#xA;      if (rowCount &amp;amp;gt; 1) {&amp;#xA;        var deleteButton = document.createElement(&amp;amp;quot;input&amp;amp;quot;);&amp;#xA;        deleteButton.type = &amp;amp;quot;button&amp;amp;quot;;&amp;#xA;        deleteButton.value = &amp;amp;quot;Delete&amp;amp;quot;;&amp;#xA;        deleteButton.classList.add(&amp;amp;quot;delete-btn&amp;amp;quot;);&amp;#xA;        deleteButton.addEventListener(&amp;amp;quot;click&amp;amp;quot;, function () {&amp;#xA;          deleteRow(deleteButton);&amp;#xA;        });&amp;#xA;        cell9.appendChild(deleteButton);&amp;#xA;      } else {&amp;#xA;        cell9.innerHTML = &amp;#x27;&amp;#x27;; // No delete button for the first row&amp;#xA;      }&amp;#xA;    }&amp;#xA;&amp;#xA;     function toggleOtherItemInput(rowNumber) {&amp;#xA;  var itemSelect = document.getElementById(&amp;#x27;item&amp;#x27; &amp;#x2B; rowNumber);&amp;#xA;  var otherItemInput = document.getElementById(&amp;#x27;otherItem&amp;#x27; &amp;#x2B; rowNumber);&amp;#xA;  if(itemSelect.value === &amp;#x27;other&amp;#x27;) {&amp;#xA;    otherItemInput.style.display = &amp;#x27;inline&amp;#x27;; // Show the text input&amp;#xA;  } else {&amp;#xA;    otherItemInput.style.display = &amp;#x27;none&amp;#x27;; // Hide the text input&amp;#xA;    otherItemInput.value = &amp;#x27;&amp;#x27;; // Clear any text that was entered&amp;#xA;  }&amp;#xA;}&amp;#xA;&amp;#xA;    function calculateTotal(rowNumber) {&amp;#xA;    var rate = parseFloat(document.getElementById(&amp;#x27;rate&amp;#x27; &amp;#x2B; rowNumber).value) || 0;&amp;#xA;    var qty = parseFloat(document.getElementById(&amp;#x27;qty&amp;#x27; &amp;#x2B; rowNumber).value) || 0;&amp;#xA;    &amp;#xA;    var totalAmount = rate * qty;&amp;#xA;    var gstAmount = totalAmount * 0.18; // Calculate GST (18%)&amp;#xA;    var totalWithGST = totalAmount &amp;#x2B; gstAmount; // Add GST to the total amount&amp;#xA;&amp;#xA;    document.getElementById(&amp;#x27;total&amp;#x27; &amp;#x2B; rowNumber).value = totalWithGST.toFixed(2);&amp;#xA;    document.getElementById(&amp;#x27;gst&amp;#x27; &amp;#x2B; rowNumber).value = gstAmount.toFixed(2); // Display GST in the GST column&amp;#xA;   }&amp;#xA;&amp;#xA;    function submitForm() {&amp;#xA;      // Fetch data from the form&amp;#xA;      var referenceCode = document.getElementById(&amp;#x27;referenceCode&amp;#x27;).value;&amp;#xA;      var pINumber = document.getElementById(&amp;#x27;pINumber&amp;#x27;).value;&amp;#xA;      var clientName = document.getElementById(&amp;#x27;clientName&amp;#x27;).value;&amp;#xA;      var architectName = document.getElementById(&amp;#x27;architectName&amp;#x27;).value;&amp;#xA;      var clientPhoneNumber = document.getElementById(&amp;#x27;clientPhoneNumber&amp;#x27;).value;&amp;#xA;      var architectPhoneNumber = document.getElementById(&amp;#x27;architectPhoneNumber&amp;#x27;).value;&amp;#xA;      var clientmailid = document.getElementById(&amp;#x27;clientmailid&amp;#x27;).value;&amp;#xA;      var architectmailid = document.getElementById(&amp;#x27;architectmailid&amp;#x27;).value;&amp;#xA;      var clientCompanyName = document.getElementById(&amp;#x27;clientCompanyName&amp;#x27;).value;&amp;#xA;      var referenceName = document.getElementById(&amp;#x27;referenceName&amp;#x27;).value;&amp;#xA;      var referencepersonName = document.getElementById(&amp;#x27;referencepersonName&amp;#x27;).value;&amp;#xA;      var salesPersonName = document.getElementById(&amp;#x27;salesPersonName&amp;#x27;).value;&amp;#xA;      var projectType =document.getElementById(&amp;#x27;projectType&amp;#x27;).value;&amp;#xA;      var leadTime =document.getElementById(&amp;#x27;leadTime&amp;#x27;).value;&amp;#xA;      var projectTypeValue;&amp;#xA;      var projectTypeSelect = document.getElementById(&amp;#x27;projectType&amp;#x27;);&amp;#xA;      if (projectTypeSelect.value === &amp;#x27;other&amp;#x27;) {&amp;#xA;      projectTypeValue = document.getElementById(&amp;#x27;otherProjectType&amp;#x27;).value;&amp;#xA;     } else {&amp;#xA;    projectTypeValue = projectTypeSelect.value;&amp;#xA;    }&amp;#xA;&amp;#xA;    if (clientmailid.trim() !== &amp;amp;quot;&amp;amp;quot;) {&amp;#xA;      // Validate email format&amp;#xA;      var emailRegex = /^[^\s@]&amp;#x2B;@[^\s@]&amp;#x2B;\.[^\s@]&amp;#x2B;$/;&amp;#xA;      if (!emailRegex.test(clientmailid)) {&amp;#xA;        alert(&amp;amp;quot;Please enter valid email addresses for Client and Architect.&amp;amp;quot;);&amp;#xA;        return;&amp;#xA;      }&amp;#xA;    } else {&amp;#xA;      // If client email is empty, set it to &amp;amp;quot;NA&amp;amp;quot;&amp;#xA;      clientmailid = &amp;amp;quot;NA&amp;amp;quot;;&amp;#xA;    }&amp;#xA;&amp;#xA;&amp;#xA;      // Validate phone number format and range using regular expression&amp;#xA;      var phoneRegex = /^[6-9]\d{9}$/;&amp;#xA;      if (!phoneRegex.test(clientPhoneNumber)) {&amp;#xA;        alert(&amp;amp;quot;Please enter valid phone number&amp;amp;quot;);&amp;#xA;        return;&amp;#xA;      }&amp;#xA;&amp;#xA;&amp;#xA;      var clientPhoneNum = parseInt(clientPhoneNumber);&amp;#xA;      var architectPhoneNum = parseInt(architectPhoneNumber);&amp;#xA;      if (clientPhoneNum &amp;amp;lt; 5999999999 || clientPhoneNum &amp;amp;gt; 9999999999 ) {&amp;#xA;        alert(&amp;amp;quot;Please enter valid phone number.&amp;amp;quot;);&amp;#xA;        return;&amp;#xA;      }&amp;#xA;&amp;#xA;      // Fetch item details from the table&amp;#xA;      var itemDetails = [];&amp;#xA;      var table = document.getElementById(&amp;#x27;itemDetailsTable&amp;#x27;);&amp;#xA;    for (var i = 1; i &amp;amp;lt; table.rows.length; i&amp;#x2B;&amp;#x2B;) {&amp;#xA;    var row = table.rows[i];&amp;#xA;    var itemSelect = row.cells[0].getElementsByTagName(&amp;#x27;select&amp;#x27;)[0];&amp;#xA;    var item = itemSelect.value;&amp;#xA;    if(item === &amp;#x27;other&amp;#x27;) {&amp;#xA;      item = row.cells[0].getElementsByTagName(&amp;#x27;input&amp;#x27;)[0].value; // Get the value from the text input&amp;#xA;    }&amp;#xA;        var rate = row.cells[1].getElementsByTagName(&amp;#x27;input&amp;#x27;)[0].value;&amp;#xA;        var qty = row.cells[2].getElementsByTagName(&amp;#x27;input&amp;#x27;)[0].value&amp;#xA;        if (!clientName || !item || !rate || !qty) {&amp;#xA;        alert(&amp;amp;quot;Please fill in Client Name, Item, Rate, and Qty for all rows before submitting the form.&amp;amp;quot;);&amp;#xA;        return;&amp;#xA;      }&amp;#xA;        var gst = row.cells[3].getElementsByTagName(&amp;#x27;input&amp;#x27;)[0].value; //extracted value of gst calculated&amp;#xA;        var total = row.cells[4].getElementsByTagName(&amp;#x27;input&amp;#x27;)[0].value;&amp;#xA;        var remarks = row.cells[5].getElementsByTagName(&amp;#x27;input&amp;#x27;)[0].value;&amp;#xA;&amp;#xA;        itemDetails.push({&amp;#xA;          item: item,&amp;#xA;          rate: rate,&amp;#xA;          qty: qty,&amp;#xA;          gst:gst, //added gst to the itemDetails object&amp;#xA;          total: total,&amp;#xA;          remarks: remarks&amp;#xA;        });&amp;#xA;      }&amp;#xA;&amp;#xA;      // Create a FormData object to send to the server&amp;#xA;      var formData = {&amp;#xA;        referenceCode: referenceCode,&amp;#xA;        pINumber:pINumber,&amp;#xA;        clientName:clientName,&amp;#xA;        architectName:architectName,&amp;#xA;        clientPhoneNumber:clientPhoneNumber,&amp;#xA;        architectPhoneNumber:architectPhoneNumber,&amp;#xA;        clientmailid:clientmailid,&amp;#xA;        architectmailid:architectmailid,&amp;#xA;        clientCompanyName:clientCompanyName,&amp;#xA;        referenceName:referenceName,&amp;#xA;        referencepersonName:referencepersonName,&amp;#xA;        salesPersonName:salesPersonName,&amp;#xA;        projectType:projectType,&amp;#xA;        leadTime:leadTime,&amp;#xA;        itemDetails:itemDetails,&amp;#xA;      };&amp;#xA;&amp;#xA;        // Update formData object to include projectTypeValue&amp;#xA;        formData.projectType = projectTypeValue;&amp;#xA;&amp;#xA;       // Use google.script.run to call the server-side function&amp;#xA;         google.script.run&amp;#xA;        .withSuccessHandler(handleSuccess)&amp;#xA;        .processForm(formData, itemDetails, table.rows.length - 1);&amp;#xA;    }&amp;#xA;&amp;#xA;     // Callback function to handle success&amp;#xA;      function handleSuccess(response) {&amp;#xA;      alert(&amp;amp;quot;Thanks For the Order&amp;amp;quot;);&amp;#xA;     // reload the page rather than reset so that the reference Code is regerated which was not he case earlier.&amp;#xA;     document.getElementById(&amp;amp;quot;EnquiryCaptureForm&amp;amp;quot;).reset();&amp;#xA;      //location.reload(); do this when we have a static url so reload back to the page.&amp;#xA;     }&amp;#xA;  &amp;amp;lt;/script&amp;amp;gt;&amp;#xA;&amp;amp;lt;/body&amp;amp;gt;&amp;#xA;&amp;#xA;&amp;amp;lt;/html&amp;amp;gt;&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Code.gs:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function doGet() {&amp;#xA;  return HtmlService.createHtmlOutputFromFile(&amp;#x27;Index&amp;#x27;);&amp;#xA;}&amp;#xA;&amp;#xA; // This function is called when the form is submitted&amp;#xA;function processForm(formData, itemDetails) {&amp;#xA;  var sheetId = &amp;#x27;XXXXXXXXXXXXXXXXXXXX&amp;#x27;;&amp;#xA;  var sheet = SpreadsheetApp.openById(sheetId);&amp;#xA;&amp;#xA; // Add timestamp to the first column&amp;#xA;  var timestamp = new Date();&amp;#xA;&amp;#xA;  // Add data to the spreadsheet using appendRow for formData and the first itemDetail&amp;#xA;sheet.appendRow([&amp;#xA;  timestamp,&amp;#xA;  formData.referenceCode,&amp;#xA;  formData.pINumber,&amp;#xA;  formData.clientName,&amp;#xA;  formData.architectName,&amp;#xA;  formData.clientPhoneNumber,&amp;#xA;  formData.architectPhoneNumber,&amp;#xA;  formData.clientmailid,&amp;#xA;  formData.architectmailid,&amp;#xA;  formData.clientCompanyName,&amp;#xA;  formData.referenceName,&amp;#xA;  formData.referencepersonName,&amp;#xA;  formData.salesPersonName,&amp;#xA;  formData.projectType,&amp;#xA;  formData.leadTime,&amp;#xA;  itemDetails.length &amp;amp;gt; 0 ? itemDetails[0].item : &amp;amp;quot;&amp;amp;quot;,&amp;#xA;  itemDetails.length &amp;amp;gt; 0 ? itemDetails[0].rate : &amp;amp;quot;&amp;amp;quot;,&amp;#xA;  itemDetails.length &amp;amp;gt; 0 ? itemDetails[0].qty : &amp;amp;quot;&amp;amp;quot;,&amp;#xA;  itemDetails.length &amp;amp;gt; 0 ? itemDetails[0].gst : &amp;amp;quot;&amp;amp;quot;, //add gst to the sheet&amp;#xA;  itemDetails.length &amp;amp;gt; 0 ? itemDetails[0].total : &amp;amp;quot;&amp;amp;quot;,&amp;#xA;  itemDetails.length &amp;amp;gt; 0 ? itemDetails[0].remarks : &amp;amp;quot;&amp;amp;quot;, // Use correct index&amp;#xA;  &amp;amp;quot;&amp;amp;quot; // Add an empty column for deleteButton&amp;#xA;]);&amp;#xA;&amp;#xA;// Add multiple rows for the remaining Item Details data&amp;#xA;for (var i = 1; i &amp;amp;lt; itemDetails.length; i&amp;#x2B;&amp;#x2B;) {&amp;#xA;  var itemDetail = itemDetails[i];&amp;#xA;  sheet.appendRow([&amp;#xA;    timestamp,&amp;#xA;    formData.referenceCode,&amp;#xA;    formData.pINumber,&amp;#xA;    formData.clientName,&amp;#xA;    formData.architectName,&amp;#xA;    formData.clientPhoneNumber,&amp;#xA;    formData.architectPhoneNumber,&amp;#xA;    formData.clientmailid,&amp;#xA;    formData.architectmailid,&amp;#xA;    formData.clientCompanyName,&amp;#xA;    formData.referenceName,&amp;#xA;    formData.referencepersonName,&amp;#xA;    formData.salesPersonName,&amp;#xA;    formData.projectType,&amp;#xA;    formData.leadTime,&amp;#xA;    itemDetail.item,&amp;#xA;    itemDetail.rate,&amp;#xA;    itemDetail.qty,&amp;#xA;    itemDetail.gst, //add gst to the sheet&amp;#xA;    itemDetail.total,&amp;#xA;    itemDetail.remarks, // Use correct index&amp;#xA;    &amp;amp;quot;&amp;amp;quot; // Add an empty column for deleteButton&amp;#xA;  ]);&amp;#xA;}&amp;#xA;&amp;#xA;&amp;#xA;&amp;#xA;&amp;#xA;  return &amp;amp;quot;Form submitted successfully!&amp;amp;quot;;&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Expected layout:&amp;#xA;[![enter image description here][1]][1]&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;Actual google app script deployed mobile view:&amp;#xA;[![enter image description here][2]][2]&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;And no its is not because of the table at the bottom, it is being properly being viewed in the expected image just it is not visible because I will have to scroll.&amp;#xA;[1]: &amp;lt;a href=&amp;quot;https://i.stack.imgur.com/iv3AI.png&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;https://i.stack.imgur.com/iv3AI.png&amp;lt;/a&amp;gt;&amp;#xA;[2]: &amp;lt;a href=&amp;quot;https://i.stack.imgur.com/HuzNO.png&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;https://i.stack.imgur.com/HuzNO.png&amp;lt;/a&amp;gt;&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77832477&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;-1&lt;/re:rank&gt;
+        &lt;title type="text"&gt;I am trying to count itlacized words in a google sheet and having trouble&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Jonathan Ish-shalom&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/23258225&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77832477/i-am-trying-to-count-itlacized-words-in-a-google-sheet-and-having-trouble" /&gt;
+        &lt;published&gt;2024-01-17T12:33:23Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-17T13:32:49Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;p&amp;gt;I am attaching below my current code. I basically copied a code to count bold words in my doc and changed a couple things, but didn&amp;#x27;t count. It runs, but says I have zero. Pleas help:&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function countitaliccells() {&amp;#xA;  var book = SpreadsheetApp.getActiveSpreadsheet();&amp;#xA;  var sheet = book.getActiveSheet();&amp;#xA;  var range_input = sheet.getRange(&amp;amp;quot;A2:F100&amp;amp;quot;); &amp;#xA;  var range_output = sheet.getRange(&amp;amp;quot;G7&amp;amp;quot;);&amp;#xA;  var cell_styles = range_input.getFontStyle(); // getFontStyle can only return &amp;#x27;italic&amp;#x27; or &amp;#x27;normal&amp;#x27;&amp;#xA;  var count = 0;&amp;#xA;&amp;#xA;  for(var r = 0; r &amp;amp;lt; cell_styles.length; r&amp;#x2B;&amp;#x2B;) {&amp;#xA;    for(var c = 0; c &amp;amp;lt; cell_styles[0].length; c&amp;#x2B;&amp;#x2B;) { // isBold is a method for Google Documents only (not sheets) &amp;#xA;      if(cell_styles[r][c] === &amp;amp;quot;italic&amp;amp;quot;) { // you need at least two &amp;#x27;=&amp;#x27; signs // also include the index of cell_styles&amp;#xA;        count = count &amp;#x2B; 1; // count &amp;#x2B;= 1 would also work&amp;#xA;      }&amp;#xA;    }&amp;#xA;  }&amp;#xA;  range_output.setValue(count); // make sure you setValue only when booth loops are done.&amp;#xA;}&amp;#xA;&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;see above. Basically&amp;lt;/p&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+    &lt;entry&gt;
+        &lt;id&gt;https://stackoverflow.com/q/77832197&lt;/id&gt;
+        &lt;re:rank scheme="https://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+        &lt;title type="text"&gt;google apps script to return sheetnames along with isActive and isHidden state, on deploying the web url does not output as expected in doGet function&lt;/title&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-apps-script" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-sheets" /&gt;
+            &lt;category scheme="https://stackoverflow.com/tags" term="google-workspace" /&gt;
+        &lt;author&gt;
+            &lt;name&gt;Mohd Shahnawaz&lt;/name&gt;
+            &lt;uri&gt;https://stackoverflow.com/users/20704044&lt;/uri&gt;
+        &lt;/author&gt;
+        &lt;link rel="alternate" href="https://stackoverflow.com/questions/77832197/google-apps-script-to-return-sheetnames-along-with-isactive-and-ishidden-state" /&gt;
+        &lt;published&gt;2024-01-17T11:49:27Z&lt;/published&gt;
+        &lt;updated&gt;2024-01-17T11:49:27Z&lt;/updated&gt;
+        &lt;summary type="html"&gt;
+            &amp;lt;ul&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;the implement function returns the sheetname, sheet active or not, sheet hidden or not accurately. Function given below -&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;/ul&amp;gt;&amp;#xA;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;function doGet() {&amp;#xA;  var ss = SpreadsheetApp.getActiveSpreadsheet();&amp;#xA;  var sheets = ss.getSheets();&amp;#xA;  var activeSheetId = ss.getActiveSheet().getSheetId();&amp;#xA;&amp;#xA;  var sheetData = sheets.map(function(sheet) {&amp;#xA;    return {&amp;#xA;      id: sheet.getSheetId(),&amp;#xA;      name: sheet.getName(),&amp;#xA;      isActive: sheet.getSheetId() === activeSheetId,&amp;#xA;      isHidden: sheet.isSheetHidden()&amp;#xA;    };&amp;#xA;  });&amp;#xA;&amp;#xA;  console.log(sheetData);&amp;#xA;&amp;#xA;  return ContentService&amp;#xA;    .createTextOutput(JSON.stringify({ sheetData: sheetData }))&amp;#xA;    .setMimeType(ContentService.MimeType.JSON);&amp;#xA;}&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;ul&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;this outputs accurately what I need, here is shows Sheet136 isActive: true&amp;#xA;&amp;lt;a href=&amp;quot;https://i.stack.imgur.com/4GJCT.png&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;output from doGet function&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;/ul&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;[ { id: 1342625645,&amp;#xA;name: &amp;#x27;Sheet135&amp;#x27;,&amp;#xA;isActive: false,&amp;#xA;isHidden: false },&amp;#xA;{ id: 1185282813,&amp;#xA;name: &amp;#x27;Sheet136&amp;#x27;,&amp;#xA;isActive: true,&amp;#xA;isHidden: false },&amp;#xA;{ id: 1301308349,&amp;#xA;name: &amp;#x27;Sheet137&amp;#x27;,&amp;#xA;isActive: false,&amp;#xA;isHidden: false },&amp;#xA;{ id: 45843850,&amp;#xA;name: &amp;#x27;Sheet139&amp;#x27;,&amp;#xA;isActive: false,&amp;#xA;isHidden: false } ]&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;ul&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;But on deploying the web url, the url get request gives the output like this, only on firstsheet isActive: true every time as activeSheet is Sheet136&amp;#xA;&amp;lt;a href=&amp;quot;https://i.stack.imgur.com/XjGGy.png&amp;quot; rel=&amp;quot;nofollow noreferrer&amp;quot;&amp;gt;Output from web url&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;/ul&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;[ { id: 1342625645,&amp;#xA;name: &amp;#x27;Sheet135&amp;#x27;,&amp;#xA;isActive: true,&amp;#xA;isHidden: false },&amp;#xA;{ id: 1185282813,&amp;#xA;name: &amp;#x27;Sheet136&amp;#x27;,&amp;#xA;isActive: false,&amp;#xA;isHidden: false },&amp;#xA;{ id: 1301308349,&amp;#xA;name: &amp;#x27;Sheet137&amp;#x27;,&amp;#xA;isActive: false,&amp;#xA;isHidden: false },&amp;#xA;{ id: 45843850,&amp;#xA;name: &amp;#x27;Sheet139&amp;#x27;,&amp;#xA;isActive: false,&amp;#xA;isHidden: false } ]&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;I&amp;#x27;m expecting the output return from doGet function is also same for web url, as I have deployed the web url accurately as if any sheet is Hidden, isHidden: true accurately, error only for active state.&amp;lt;/p&amp;gt;&amp;#xA;&amp;lt;ul&amp;gt;&amp;#xA;&amp;lt;li&amp;gt;If first sheet which is hidden the url also gets output like this-&amp;#xA;[ { id: 1342625645,&amp;#xA;name: &amp;#x27;Sheet135&amp;#x27;,&amp;#xA;isActive: true,&amp;#xA;isHidden: true },&amp;#xA;{ id: 1185282813,&amp;#xA;name: &amp;#x27;Sheet136&amp;#x27;,&amp;#xA;isActive: false,&amp;#xA;isHidden: false },&amp;#xA;{ id: 1301308349,&amp;#xA;name: &amp;#x27;Sheet137&amp;#x27;,&amp;#xA;isActive: false,&amp;#xA;isHidden: false },&amp;#xA;{ id: 45843850,&amp;#xA;name: &amp;#x27;Sheet139&amp;#x27;,&amp;#xA;isActive: false,&amp;#xA;isHidden: false } ]&amp;lt;/li&amp;gt;&amp;#xA;&amp;lt;/ul&amp;gt;&amp;#xA;
+        &lt;/summary&gt;
+    &lt;/entry&gt;
+&lt;/feed&gt;</pre></body></html>https://script.google.com/macros/s/AKfyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxp2Q/exec&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Headershttps://script.google.com/macros/s/AKfyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxp2Q/exec&amp;#xA;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&amp;#xA;&amp;lt;p&amp;gt;&amp;lt;strong&amp;gt;Headers
